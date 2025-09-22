@@ -5,6 +5,20 @@ Happy Birthday!
 
 ## Run the app
 
+### Flet
+
+Run as a desktop app:
+
+```flet
+flet run
+```
+
+Run as a web app:
+
+```flet
+flet run --web
+```
+
 ### uv
 
 Run as a desktop app:
