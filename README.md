@@ -1,4 +1,7 @@
-# Lanceapp app
+# The LanceApp
+
+This app is made for a certain individual... Marcus Lance Matienzo.
+Happy Birthday!
 
 ## Run the app
 
@@ -6,13 +9,13 @@
 
 Run as a desktop app:
 
-```
+```cmd
 uv run flet run
 ```
 
 Run as a web app:
 
-```
+```cmd
 uv run flet run --web
 ```
 
@@ -20,19 +23,19 @@ uv run flet run --web
 
 Install dependencies from `pyproject.toml`:
 
-```
+```cmd
 poetry install
 ```
 
 Run as a desktop app:
 
-```
+```cmd
 poetry run flet run
 ```
 
 Run as a web app:
 
-```
+```cmd
 poetry run flet run --web
 ```
 
@@ -42,7 +45,7 @@ For more details on running the app, refer to the [Getting Started Guide](https:
 
 ### Android
 
-```
+```cmd
 flet build apk -v
 ```
 
@@ -50,7 +53,7 @@ For more details on building and signing `.apk` or `.aab`, refer to the [Android
 
 ### iOS
 
-```
+```cmd
 flet build ipa -v
 ```
 
@@ -58,7 +61,7 @@ For more details on building and signing `.ipa`, refer to the [iOS Packaging Gui
 
 ### macOS
 
-```
+```cmd
 flet build macos -v
 ```
 
@@ -66,7 +69,7 @@ For more details on building macOS package, refer to the [macOS Packaging Guide]
 
 ### Linux
 
-```
+```cmd
 flet build linux -v
 ```
 
@@ -74,7 +77,7 @@ For more details on building Linux package, refer to the [Linux Packaging Guide]
 
 ### Windows
 
-```
+```cmd
 flet build windows -v
 ```
 

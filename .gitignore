@@ -161,3 +161,9 @@ cython_debug/
 
 # Flet
 storage/
+
+# VSCode Settings
+.vscode/
+
+# Settings
+settings.json
