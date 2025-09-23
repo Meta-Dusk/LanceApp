@@ -1,11 +1,13 @@
 import flet as ft
 
 
-def main(page: ft.Page):
+async def main(page: ft.Page):
     page.title = "Test"
+    page.window.width = 500
+    page.window.height = 200
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
-    page.window.center()
+    await page.window.center()
     
     counter = ft.Text("0", size=50, data=0)
 
@@ -23,11 +25,12 @@ def main(page: ft.Page):
         ft.SafeArea(
             ft.Container(
                 counter,
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment.CENTER,
             ),
             expand=True,
         )
     )
 
 
-ft.app(main)
+if __name__ == "__main__":
+    ft.run(main)
