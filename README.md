@@ -1,4 +1,4 @@
-# Soundboard made especially for Marcus Lance
+# A Desktop Assistant App made especially for Marcus Lance
 
 > **Happy Birthday, Marcus Lance!**
 >
