@@ -8,8 +8,8 @@
 
 1. Hatsune Miku
 2. Randomized Movement
-3. Random Messages
-4. Emotes (Miku's States)
+3. Randomized Messages
+4. Different Expressions
 5. Flips
 
 ## Planned Features
