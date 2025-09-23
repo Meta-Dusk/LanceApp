@@ -4,16 +4,18 @@ import threading
 import random
 
 from src.styles import transparent_window
-from src.images import DynamicMiku, Miku
-from src.utilities import get_all_monitors, check_and_adjust_bounds
+from src.images import DynamicMiku, Miku, generate_image, Sprites
+from src.utilities import get_all_monitors, check_and_adjust_bounds, random_line, speech_lines
 
 
 def test(page: ft.Page):
     # ------- Setup -------
-    DEBUG = True
+    DEBUG = False
     transparent_window(page, debug=DEBUG)
     stop_event = threading.Event()
     restart_timer = None
+    speech_timer = None
+    speech_bubble = None
     miku_mv_freq_ms = (1000, 1500)
 
     # Place window on primary monitor bottom center
@@ -59,6 +61,7 @@ def test(page: ft.Page):
 
     def on_tap(_):
         main_miku.set_state(Miku.PONDER)
+        miku_chat()
         restart_loop_after_delay()
 
     def on_double_tap(_):
@@ -88,6 +91,44 @@ def test(page: ft.Page):
         main_miku.set_long_pressed(False)
         restart_loop_after_delay()
     
+    # ------- Chat Feature -------
+    def generate_speech(msg: str) -> ft.Container:
+        return ft.Container(
+            content=ft.Text(value=msg, font_family="BlrrPix", size=16),
+            bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE),
+            padding=10, border_radius=15, left=0, right=0, top=0,
+            border=ft.border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE)),
+            alignment=ft.alignment.top_center,
+        )
+
+    def remove_speech():
+        nonlocal speech_bubble
+        if speech_bubble and speech_bubble in miku_stack.controls:
+            miku_stack.controls.remove(speech_bubble)
+            speech_bubble = None
+            page.update()
+
+    def miku_chat():
+        nonlocal speech_bubble, speech_timer
+
+        # Cancel previous timer if still running
+        if speech_timer and speech_timer.is_alive():
+            speech_timer.cancel()
+
+        if speech_bubble and speech_bubble in miku_stack.controls:
+            # Reuse existing bubble
+            speech_text: ft.Text = speech_bubble.content
+            speech_text.value = random_line(speech_lines)
+            page.update()
+        else:
+            # Create new bubble
+            speech_bubble = generate_speech(random_line(speech_lines))
+            miku_stack.controls.append(speech_bubble)
+            page.update()
+
+        # Reset removal timer
+        speech_timer = threading.Timer(2, remove_speech)
+        speech_timer.start()
     
     # ------- Movement Loop -------
     def restart_loop_after_delay(delay: int | None = None):
@@ -130,6 +171,8 @@ def test(page: ft.Page):
                 move_miku(rnd_step)
 
     def start_loop():
+        if main_miku.state != Miku.NEUTRAL.name:
+            main_miku.set_state(Miku.NEUTRAL)
         debug_msg("Starting Movement Loop :: Starting Loop")
         stop_event.clear()
         threading.Thread(target=movement_loop, daemon=True).start()
@@ -149,7 +192,10 @@ def test(page: ft.Page):
     exit_miku_img.opacity = 0
 
     # Stack them
-    miku_stack = ft.Stack(controls=[exit_miku_img, main_miku_img], alignment=ft.alignment.center)
+    miku_stack = ft.Stack(
+        controls=[exit_miku_img, main_miku_img], alignment=ft.alignment.center,
+        expand=True
+    )
 
     miku_gs = ft.GestureDetector(
         content=miku_stack,

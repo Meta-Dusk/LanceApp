@@ -1,8 +1,13 @@
 import flet as ft
 
 import screeninfo
+import random
 
 from typing import Optional
+from pathlib import Path
+
+
+LINES_PATH = Path("src") / "miku_speech.txt"
 
 
 def get_all_monitors():
@@ -60,3 +65,13 @@ def check_and_adjust_bounds(page: ft.Page):
     if clamped_left != page.window.left or clamped_top != page.window.top:
         page.window.left, page.window.top = clamped_left, clamped_top
         page.update()
+        
+def load_lines(file_path: str) -> list[str]:
+    with open(file_path, "r", encoding="utf-8") as f:
+        # Strip newlines and skip empty lines
+        return [line.strip() for line in f if line.strip()]
+
+def random_line(lines: list[str]) -> str:
+    return random.choice(lines)
+
+speech_lines = load_lines(LINES_PATH)

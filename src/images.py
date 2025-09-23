@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Optional
-from src.styles import transparent_window
 
 
 IMAGES_PATH = Path("images")
@@ -73,11 +72,15 @@ class Miku(Enum):
     THINKING = MikuData(src=get_miku_state(MikuStates.THINKING))
 
 
+class Sprites(Enum):
+    SPEECH_BUBBLE = ImageData(src=IMAGES_PATH / "speech_bubble.png", width=1024, height=577)
+
 class DynamicMiku:
     def __init__(self, miku_data: Miku, debug: bool = False):
         self.debug = debug
         self.miku_data = miku_data
         self._image = self._generate_image(miku_data.value)
+        self.state = miku_data.name
 
     def _generate_image(self, miku_data):
         img = ft.Image(
@@ -109,6 +112,7 @@ class DynamicMiku:
     def set_state(self, new_state: Miku):
         """Swap to a new Miku state."""
         self._debug_msg(f"Setting state from {self.miku_data.name} -> {new_state.name}")
+        self.state = new_state.name
         self.miku_data = new_state
         self._image.src = new_state.value.src
         self._image.update()
@@ -158,10 +162,32 @@ def generate_miku(miku_data: MikuData) -> ft.Image:
 
 
 def test(page: ft.Page):
-    transparent_window(page, debug=True)
+    def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False):
+        page.bgcolor = ft.Colors.TRANSPARENT
+        page.padding = 0
+
+        page.window.bgcolor = ft.Colors.TRANSPARENT
+        page.window.title_bar_hidden = True
+        page.window.always_on_top = True
+        page.window.frameless = True
+        page.window.resizable = False
+        page.window.width = width
+        page.window.height = height
+        page.decoration = ft.BoxDecoration(border_radius=10, border=ft.border.all(2, ft.Colors.PRIMARY)) if debug else None
+    
+    # transparent_window(page, debug=True)
+    page.horizontal_alignment = ft.MainAxisAlignment.CENTER
+    page.vertical_alignment = ft.CrossAxisAlignment.CENTER
     page.window.center()
 
-    page.add(generate_miku(Miku.AMGRY.value))
+    miku = generate_miku(Miku.AMGRY.value)
+    
+    speech_bubble = generate_image(Sprites.SPEECH_BUBBLE.value)
+    speech_bubble.scale = 0.4
+    
+    stack = ft.Stack(controls=[miku, speech_bubble], alignment=ft.alignment.center)
+    
+    page.add(stack)
 
 
 if __name__ == "__main__":
