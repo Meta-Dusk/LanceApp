@@ -34,10 +34,8 @@ async def initial_test(page: ft.Page):
     )
 
 async def main(page: ft.Page):
-    await initial_test(page)
-
-def main(page: ft.Page):
-    test(page)
+    # await initial_test(page)
+    await test(page)
 
 
 if __name__ == "__main__":

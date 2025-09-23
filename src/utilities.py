@@ -75,3 +75,7 @@ def random_line(lines: list[dict]) -> dict:
     return random.choice(lines)
 
 speech_lines = load_lines(LINES_PATH)
+
+def debug_msg(msg: str, handler: str = "DEBUG", debug: bool = False):
+    if debug:
+        print(f"[{handler}] {msg}")

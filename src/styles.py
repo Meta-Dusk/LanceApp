@@ -16,7 +16,7 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.window.resizable = False
     page.window.width = width
     page.window.height = height
-    page.decoration = ft.BoxDecoration(border_radius=10, border=ft.border.all(2, ft.Colors.PRIMARY)) if debug else None
+    page.decoration = ft.BoxDecoration(border_radius=10, border=ft.Border.all(2, ft.Colors.PRIMARY)) if debug else None
     # page.appbar = ft.AppBar(
     #     actions=[
     #         ft.IconButton(ft.Icons.CHAT_BUBBLE, on_click=on_chat)
