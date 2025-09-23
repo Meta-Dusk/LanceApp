@@ -55,6 +55,7 @@ class MikuData(ImageData):
     expand: bool = True
     error_content: ft.Control = field(default_factory=lambda: error_container("No Miku 😔"))
     fit: ft.ImageFit = ft.ImageFit.FILL
+    data: Optional[dict] = None
 
 
 class Miku(Enum):
@@ -87,7 +88,11 @@ class DynamicMiku:
             fit=miku_data.fit,
             expand=miku_data.expand,
         )
-        img.data = {"flipped": False, "pan_start": False}
+        img.data = {
+            "flipped": False,
+            "pan_start": False,
+            "long_pressed": False
+        }
         img.animate_opacity = ft.Animation(0)
         img.anti_alias = miku_data.anti_alias
         self._debug_msg("A miku has been made.")
@@ -125,6 +130,12 @@ class DynamicMiku:
 
     def is_pan_start(self) -> bool:
         return self._image.data.get("pan_start", False)
+    
+    def set_long_pressed(self, active: bool) -> bool:
+        self._image.data["long_pressed"] = active
+    
+    def is_long_pressed(self) -> bool:
+        return self._image.data.get("long_pressed", False)
 
 
 def generate_image(image_data: ImageData) -> ft.Image:
