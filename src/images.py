@@ -47,6 +47,7 @@ class ImageData:
     height: Optional[int] = None
     error_content: ft.Control = field(default_factory=lambda: error_container("IMAGE ERROR"))
     fit: ft.BoxFit = ft.BoxFit.COVER
+    gapless_playback: bool = True
 
 
 @dataclass
@@ -84,23 +85,8 @@ class DynamicMiku:
         self.state = miku_data.name
 
     def _generate_image(self, miku_data):
-        img = ft.Image(
-            src=miku_data.src,
-            width=miku_data.width,
-            height=miku_data.height,
-            error_content=miku_data.error_content,
-            fit=miku_data.fit,
-            expand=miku_data.expand,
-        )
-        img.data = {
-            "flipped": False,
-            "pan_start": False,
-            "long_pressed": False
-        }
-        img.animate_opacity = ft.Animation(0)
-        img.anti_alias = miku_data.anti_alias
         self._debug_msg("A miku has been made.")
-        return img
+        return generate_miku(miku_data)
     
     def _debug_msg(self, msg: str):
         if self.debug:
@@ -150,13 +136,18 @@ def generate_image(image_data: ImageData) -> ft.Image:
         height=image_data.height,
         error_content=image_data.error_content,
         fit=image_data.fit,
+        gapless_playback=image_data.gapless_playback
     )
 
 
 def generate_miku(miku_data: MikuData) -> ft.Image:
     img = generate_image(miku_data)
     img.expand = miku_data.expand
-    img.data = {"flipped": False, "pan_start": False}
+    img.data = {
+        "flipped": False,
+        "pan_start": False,
+        "long_pressed": False
+    }
     img.animate_opacity = ft.Animation(0)
     img.anti_alias = miku_data.anti_alias
     return img
