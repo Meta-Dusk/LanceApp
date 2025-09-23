@@ -16,7 +16,7 @@ def error_container(msg: str) -> ft.Container:
         bgcolor=ft.Colors.ERROR_CONTAINER,
         border_radius=20,
         padding=5,
-        alignment=ft.alignment.center,
+        alignment=ft.Alignment.CENTER,
     )
 
 
@@ -35,8 +35,9 @@ class MikuStates(Enum):
     THINKING = "thinking"
 
 
-def get_miku_state(state: MikuStates) -> Path:
-    return MIKU_STATES / f"miku_{state.value}.png"
+def get_miku_state(state: MikuStates) -> str:
+    img_path = MIKU_STATES / f"miku_{state.value}.png"
+    return str(img_path)
 
 
 @dataclass
@@ -45,7 +46,7 @@ class ImageData:
     width: Optional[int] = None
     height: Optional[int] = None
     error_content: ft.Control = field(default_factory=lambda: error_container("IMAGE ERROR"))
-    fit: ft.ImageFit = ft.ImageFit.COVER
+    fit: ft.BoxFit = ft.BoxFit.COVER
 
 
 @dataclass
@@ -53,7 +54,7 @@ class MikuData(ImageData):
     anti_alias: bool = False
     expand: bool = True
     error_content: ft.Control = field(default_factory=lambda: error_container("No Miku 😔"))
-    fit: ft.ImageFit = ft.ImageFit.FILL
+    fit: ft.BoxFit = ft.BoxFit.FILL
     data: Optional[dict] = None
 
 
@@ -73,7 +74,7 @@ class Miku(Enum):
 
 
 class Sprites(Enum):
-    SPEECH_BUBBLE = ImageData(src=IMAGES_PATH / "speech_bubble.png", width=1024, height=577)
+    SPEECH_BUBBLE = ImageData(src=str(IMAGES_PATH / "speech_bubble.png"), width=1024, height=577)
 
 class DynamicMiku:
     def __init__(self, miku_data: Miku, debug: bool = False):

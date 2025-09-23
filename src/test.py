@@ -2,15 +2,16 @@ import flet as ft
 import time
 import threading
 import random
+import asyncio
 
-from src.styles import transparent_window
-from src.images import DynamicMiku, Miku, generate_image, Sprites
-from src.utilities import get_all_monitors, check_and_adjust_bounds, random_line, speech_lines
+from styles import transparent_window
+from images import DynamicMiku, Miku, generate_image, Sprites
+from utilities import get_all_monitors, check_and_adjust_bounds, random_line, speech_lines
 
 
 def test(page: ft.Page):
     # ------- Setup -------
-    DEBUG = False
+    DEBUG = True
     transparent_window(page, height=260, debug=DEBUG)
     stop_event = threading.Event()
     restart_timer = None
@@ -49,7 +50,7 @@ def test(page: ft.Page):
             main_miku.set_state(Miku.HAPPY)
         check_and_adjust_bounds(page)
 
-    def on_pan_start(_):
+    def on_drag_start(_):
         main_miku.set_pan_start(True)
         main_miku.set_state(Miku.ECSTATIC)
         cancel_loop()
@@ -62,11 +63,10 @@ def test(page: ft.Page):
             main_miku.set_state(Miku.NEUTRAL)
 
     def on_tap(_):
-        # main_miku.set_state(Miku.PONDER)
         miku_chat()
         restart_loop_after_delay()
 
-    def on_double_tap(_):
+    async def on_double_tap(_):
         miku_chat(msg="Bye bye 😔", emote=Miku.AMGRY, exit=True)
         cancel_loop()
         debug_msg(msg="Bye bye...", handler="Miku")
@@ -76,8 +76,8 @@ def test(page: ft.Page):
         exit_miku_img.scale = 0
         exit_miku_img.rotate = ft.Rotate(-1)
         page.update()
-        time.sleep(1)
-        page.window.close()
+        await asyncio.sleep(1)
+        await page.window.close()
     
     def on_secondary_tap(_):
         miku_chat("You can double-click me for me to leave your desktop (≧﹏ ≦)", Miku.THINKING)
@@ -100,8 +100,8 @@ def test(page: ft.Page):
             content=ft.Text(value=msg, font_family="BlrrPix", size=16),
             bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE),
             padding=10, border_radius=15, left=0, right=0, top=0,
-            border=ft.border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE)),
-            alignment=ft.alignment.top_center, offset=ft.Offset(0.0, -0.5)
+            border=ft.Border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE)),
+            alignment=ft.Alignment.TOP_CENTER, offset=ft.Offset(0.0, -0.5)
         )
 
     def remove_speech():
@@ -163,6 +163,7 @@ def test(page: ft.Page):
         
         check_and_adjust_bounds(page)
         page.update()
+        page.window.update()
     
     def movement_loop():
         while not stop_event.is_set():
@@ -209,7 +210,7 @@ def test(page: ft.Page):
 
     # Stack them
     miku_stack = ft.Stack(
-        controls=[exit_miku_img, main_miku_img], alignment=ft.alignment.bottom_center,
+        controls=[exit_miku_img, main_miku_img], alignment=ft.Alignment.BOTTOM_CENTER,
         expand=True
     )
 
@@ -224,7 +225,7 @@ def test(page: ft.Page):
         on_long_press_end=on_long_press_end,
         on_secondary_tap=on_secondary_tap
     )
-    form = ft.WindowDragArea(content=miku_gs, maximizable=False, on_pan_start=on_pan_start)
+    form = ft.WindowDragArea(content=miku_gs, maximizable=False, on_drag_start=on_drag_start)
 
     page.window.on_event = on_event
     page.on_keyboard_event = on_keyboard_event

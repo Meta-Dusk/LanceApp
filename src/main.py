@@ -1,7 +1,9 @@
 import flet as ft
 
+from test import test
 
-async def main(page: ft.Page):
+
+async def initial_test(page: ft.Page):
     page.title = "Test"
     page.window.width = 500
     page.window.height = 200
@@ -30,6 +32,12 @@ async def main(page: ft.Page):
             expand=True,
         )
     )
+
+async def main(page: ft.Page):
+    await initial_test(page)
+
+def main(page: ft.Page):
+    test(page)
 
 
 if __name__ == "__main__":
