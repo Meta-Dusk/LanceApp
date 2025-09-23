@@ -5,11 +5,8 @@ import asyncio
 from styles import transparent_window
 from images import DynamicMiku, Miku
 from utilities import (
-    get_all_monitors,
-    check_and_adjust_bounds,
-    random_line,
-    speech_lines,
-    debug_msg,
+    get_all_monitors, check_and_adjust_bounds, random_line,
+    speech_lines, debug_msg,
 )
 
 
@@ -131,17 +128,12 @@ async def test(page: ft.Page):
         else:
             speech_bubble = ft.Container(
                 content=ft.Text(
-                    value=chat if msg is None else msg,
-                    font_family="BlrrPix",
-                    size=16,
+                    value=chat if msg is None else msg, font_family="BlrrPix",
+                    size=16, text_align=ft.TextAlign.CENTER
                 ),
                 bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE),
-                padding=10,
-                border_radius=15,
-                left=0,
-                right=0,
-                top=0,
-                border=ft.Border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE)),
+                padding=10, border_radius=15, left=0, right=0, top=0,
+                border=ft.Border.all(4, ft.Colors.with_opacity(0.7, ft.Colors.BLUE_900)),
                 alignment=ft.Alignment.TOP_CENTER,
                 offset=ft.Offset(0.0, -0.5),
             )
@@ -162,11 +154,12 @@ async def test(page: ft.Page):
 
     # -------- Event Handlers --------
     def on_keyboard_event(e: ft.KeyboardEvent):
-        step = 20
-        if e.key == "D":
-            move_miku(step)
-        elif e.key == "A":
-            move_miku(-step)
+        if DEBUG:
+            step = 20
+            if e.key == "D":
+                move_miku(step)
+            elif e.key == "A":
+                move_miku(-step)
 
     async def on_close(_):
         debug_msg("Window closing... Cleaning up tasks.", debug=DEBUG)
@@ -178,7 +171,7 @@ async def test(page: ft.Page):
 
     def on_event(e: ft.WindowEvent):
         if e.type == ft.WindowEventType.MOVED:
-            main_miku.set_state(Miku.NEUTRAL)
+            miku_chat("╰(￣ω￣ｏ)", Miku.NEUTRAL)
             main_miku.set_pan_start(False)
             restart_loop_after_delay()
         elif e.type == ft.WindowEventType.BLUR:
@@ -192,7 +185,7 @@ async def test(page: ft.Page):
 
     def on_drag_start(_):
         main_miku.set_pan_start(True)
-        main_miku.set_state(Miku.ECSTATIC)
+        miku_chat("Where we going? o((>ω< ))o", Miku.ECSTATIC)
         cancel_loop()
 
     def on_enter(_):

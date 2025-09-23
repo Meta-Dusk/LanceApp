@@ -8,7 +8,7 @@ from typing import Optional
 from pathlib import Path
 
 
-LINES_PATH = Path("src") / "miku_speech.json"
+LINES_PATH = Path(__file__).resolve().parent / "assets" / "data" / "miku_speech.json"
 
 
 def get_all_monitors():

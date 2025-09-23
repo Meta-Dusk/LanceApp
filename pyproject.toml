@@ -1,65 +1,52 @@
 [project]
 name = "MikuMiku"
-version = "0.2.0"
+version = "0.2.1"
 description = "A Flet App Made for Lance"
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.13"
 authors = [
   { name = "MetaDusk", email = "andredcxxv@gmail.com" }
 ]
+license = { text = "MIT" }
+
 dependencies = [
-  "flet >=0.70.0.dev0"
+  "flet==0.70.0.dev5623",
+  "screeninfo==0.8.1"
 ]
 
 [tool.flet]
-# org name in reverse domain name notation, e.g. "com.mycompany".
-# Combined with project.name to build bundle ID for iOS and Android apps
 org = "com.metadusk"
-
-# project display name that is used as an app title on Android and iOS home screens,
-# shown in window titles and about app dialogs on desktop.
 product = "MikuMiku App"
-
-# company name to display in about app dialogs
 company = "MetaDusk Inc."
-
-# copyright text to display in about app dialogs
-copyright = "Copyright (C) 2025 MetaDuk"
-
-# Compiles your Python code to bytecode for faster loading
+copyright = "Copyright (C) 2025 MetaDusk"
 compile_app = true
-
-# Compiles dependencies
 compile_packages = true
-
-# Removes source files after compilation to reduce size
 cleanup_on_compile = true
+build_number = 5
 
-build_number = 4
+[tool.flet.assets]
+include = [
+  "data/**",
+  "images/**",
+  "fonts/**"
+]
 
 [tool.flet.splash]
-color = "#ffffff"  # Light mode background (hex or color name)
-dark_color = "#333333"  # Dark mode background
+color = "#ffffff"
+dark_color = "#333333"
 
 [tool.flet.app]
 path = "src"
 
 [tool.flet.app.boot_screen]
-show = true  # Enables the boot screen (shown while unpacking the Python app archive)
-message = "Preparing Hatsune Miku... Just a bit longer..."  # Custom message; can be platform-specific, e.g., [tool.flet.app.boot_screen.windows.message]
+show = true
+message = "Preparing Hatsune Miku... Just a bit longer..."
 
 [tool.flet.app.startup_screen]
-show = true  # Enables the startup screen (shown while unpacking dependencies and starting the Python app)
-message = "Waking Hatsune Miku up... Please wait."  # Custom message
+show = true
+message = "Waking Hatsune Miku up... Please wait."
 
 [tool.uv]
 dev-dependencies = [
-  "flet[all]>=0.70.0.dev0",
+  "flet==0.70.0.dev5623",
 ]
-
-# Comment out or remove poetry sections to avoid conflicts
-#[tool.poetry]
-#package-mode = false
-
-#[tool.poetry.group.dev.dependencies]
-#flet = {extras = ["all"], version = ">=0.70.0.dev0"}  # Updated to alpha

@@ -1,11 +1,13 @@
 import flet as ft
 
+from pathlib import Path
+
 
 def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False):
     page.bgcolor = ft.Colors.TRANSPARENT
     page.padding = 0
     page.fonts = {
-        "BlrrPix": "blrrpixs016.ttf"
+        "BlrrPix": str(Path("fonts") / "blrrpixs016.ttf")
     }
     page.vertical_alignment = ft.MainAxisAlignment.END
 
