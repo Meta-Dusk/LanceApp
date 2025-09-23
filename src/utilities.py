@@ -2,12 +2,13 @@ import flet as ft
 
 import screeninfo
 import random
+import json
 
 from typing import Optional
 from pathlib import Path
 
 
-LINES_PATH = Path("src") / "miku_speech.txt"
+LINES_PATH = Path("src") / "miku_speech.json"
 
 
 def get_all_monitors():
@@ -66,12 +67,11 @@ def check_and_adjust_bounds(page: ft.Page):
         page.window.left, page.window.top = clamped_left, clamped_top
         page.update()
         
-def load_lines(file_path: str) -> list[str]:
+def load_lines(file_path: str) -> list[dict]:
     with open(file_path, "r", encoding="utf-8") as f:
-        # Strip newlines and skip empty lines
-        return [line.strip() for line in f if line.strip()]
+        return json.load(f)  # returns a list of dicts
 
-def random_line(lines: list[str]) -> str:
+def random_line(lines: list[dict]) -> dict:
     return random.choice(lines)
 
 speech_lines = load_lines(LINES_PATH)

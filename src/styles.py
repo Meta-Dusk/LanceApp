@@ -7,6 +7,7 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.fonts = {
         "BlrrPix": "blrrpixs016.ttf"
     }
+    page.vertical_alignment = ft.MainAxisAlignment.END
 
     page.window.bgcolor = ft.Colors.TRANSPARENT
     page.window.title_bar_hidden = True

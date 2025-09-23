@@ -11,12 +11,13 @@ from src.utilities import get_all_monitors, check_and_adjust_bounds, random_line
 def test(page: ft.Page):
     # ------- Setup -------
     DEBUG = False
-    transparent_window(page, debug=DEBUG)
+    transparent_window(page, height=260, debug=DEBUG)
     stop_event = threading.Event()
     restart_timer = None
     speech_timer = None
     speech_bubble = None
     miku_mv_freq_ms = (1000, 1500)
+    miku_mv_step = (-100, 100)
 
     # Place window on primary monitor bottom center
     monitors = get_all_monitors()
@@ -30,11 +31,12 @@ def test(page: ft.Page):
     
     # ------- Event Handlers -------
     def on_keyboard_event(e: ft.KeyboardEvent):
-        step = 20
-        if e.key == "D":
-            move_miku(step)
-        elif e.key == "A":
-            move_miku(step)
+        if DEBUG:
+            step = 20
+            if e.key == "D":
+                move_miku(step)
+            elif e.key == "A":
+                move_miku(-step)
 
     def on_event(e: ft.WindowEvent):
         if e.type == ft.WindowEventType.MOVED:
@@ -60,11 +62,12 @@ def test(page: ft.Page):
             main_miku.set_state(Miku.NEUTRAL)
 
     def on_tap(_):
-        main_miku.set_state(Miku.PONDER)
+        # main_miku.set_state(Miku.PONDER)
         miku_chat()
         restart_loop_after_delay()
 
     def on_double_tap(_):
+        miku_chat(msg="Bye bye 😔", emote=Miku.AMGRY, exit=True)
         cancel_loop()
         debug_msg(msg="Bye bye...", handler="Miku")
         exit_miku_img.opacity = 1
@@ -77,17 +80,17 @@ def test(page: ft.Page):
         page.window.close()
     
     def on_secondary_tap(_):
-        main_miku.set_state(Miku.THINKING)
+        miku_chat("You can double-click me for me to leave your desktop (≧﹏ ≦)", Miku.THINKING)
         cancel_loop()
         restart_loop_after_delay()
     
     def on_long_press_start(_):
-        main_miku.set_state(Miku.SHOCK)
+        miku_chat("W-what are you doing?! ヽ（≧□≦）ノ", Miku.SHOCK)
         main_miku.set_long_pressed(True)
         cancel_loop()
     
     def on_long_press_end(_):
-        main_miku.set_state(Miku.AMGRY)
+        miku_chat("Hmph (* ￣︿￣)", Miku.AMGRY)
         main_miku.set_long_pressed(False)
         restart_loop_after_delay()
     
@@ -98,7 +101,7 @@ def test(page: ft.Page):
             bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE),
             padding=10, border_radius=15, left=0, right=0, top=0,
             border=ft.border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE)),
-            alignment=ft.alignment.top_center,
+            alignment=ft.alignment.top_center, offset=ft.Offset(0.0, -0.5)
         )
 
     def remove_speech():
@@ -108,9 +111,13 @@ def test(page: ft.Page):
             speech_bubble = None
             page.update()
 
-    def miku_chat():
+    def miku_chat(msg: str | None = None, emote: Miku | None = None, exit: bool = False):
         nonlocal speech_bubble, speech_timer
-
+        
+        random_chat = random_line(speech_lines)
+        chat: str = random_chat["text"]
+        emotion: str = random_chat["emotion"]
+        
         # Cancel previous timer if still running
         if speech_timer and speech_timer.is_alive():
             speech_timer.cancel()
@@ -118,17 +125,19 @@ def test(page: ft.Page):
         if speech_bubble and speech_bubble in miku_stack.controls:
             # Reuse existing bubble
             speech_text: ft.Text = speech_bubble.content
-            speech_text.value = random_line(speech_lines)
-            page.update()
+            speech_text.value = chat if msg is None else msg
         else:
             # Create new bubble
-            speech_bubble = generate_speech(random_line(speech_lines))
+            speech_bubble = generate_speech(chat if msg is None else msg)
             miku_stack.controls.append(speech_bubble)
-            page.update()
+        
+        main_miku.set_state(getattr(Miku, emotion.upper(), emotion) if emote is None else emote)
+        page.update()
 
         # Reset removal timer
-        speech_timer = threading.Timer(2, remove_speech)
-        speech_timer.start()
+        if not exit:
+            speech_timer = threading.Timer(2, remove_speech)
+            speech_timer.start()
     
     # ------- Movement Loop -------
     def restart_loop_after_delay(delay: int | None = None):
@@ -142,12 +151,14 @@ def test(page: ft.Page):
         restart_timer = threading.Timer(delay, start_loop)
         restart_timer.start()
     
-    def move_miku(step: int):
+    def move_miku(step: int, rotate: float | None = None):
         if step > 0:
             main_miku.set_flipped(False)
         else:
             main_miku.set_flipped(True)
-            
+        
+        main_miku_img.rotate = 0
+        main_miku_img.rotate = ft.Rotate(0.1 * (abs(step) / 100)) if rotate is None else rotate
         page.window.left += step
         
         check_and_adjust_bounds(page)
@@ -164,11 +175,15 @@ def test(page: ft.Page):
             debug_msg(msg=f"Sleeping for {rnd_delay}s", handler="Miku")
             time.sleep(rnd_delay)
             
-            rnd_step = random.randint(-100, 100)
+            step_min, step_max = miku_mv_step
+            rnd_step = random.randint(step_min, step_max)
             debug_msg(msg=f"Moving with {rnd_step}", handler="Miku")
             
             if not main_miku.is_pan_start() and not stop_event.is_set():
-                move_miku(rnd_step)
+                if rnd_step > 80 or rnd_step < -80:
+                    move_miku(rnd_delay, 3.14 * 2)
+                else:
+                    move_miku(rnd_step)
 
     def start_loop():
         if main_miku.state != Miku.NEUTRAL.name:
@@ -184,6 +199,7 @@ def test(page: ft.Page):
     # Create Miku wrappers
     main_miku = DynamicMiku(Miku.NEUTRAL, debug=False)
     main_miku_img = main_miku.get_image()
+    main_miku_img.animate_rotation = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
 
     exit_miku = DynamicMiku(Miku.AMGRY, debug=False)
     exit_miku_img = exit_miku.get_image()
@@ -193,7 +209,7 @@ def test(page: ft.Page):
 
     # Stack them
     miku_stack = ft.Stack(
-        controls=[exit_miku_img, main_miku_img], alignment=ft.alignment.center,
+        controls=[exit_miku_img, main_miku_img], alignment=ft.alignment.bottom_center,
         expand=True
     )
 

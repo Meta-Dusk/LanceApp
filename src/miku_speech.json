@@ -1,0 +1,15 @@
+[
+  { "text": "Hello, I'm Miku (●'◡'●)", "emotion": "neutral" },
+  { "text": "Do you like music? (✿◡‿◡)", "emotion": "singing" },
+  { "text": "Let's dance together (~￣▽￣)~", "emotion": "joy" },
+  { "text": "I'm feeling happy today\nヾ(≧▽≦*)o", "emotion": "happy" },
+  { "text": "Hatsune Miku does NOT talk to British people (* ￣︿￣)", "emotion": "amgry" },
+  { "text": "I've been learning a lot of Python recently ╰(*°▽°*)╯", "emotion": "glasses"},
+  { "text": "I've been waiting to talk to you... (*/ω＼*)", "emotion": "ponder"},
+  { "text": "Did you know? I'm here because of the Python library, Flet (☆▽☆)", "emotion": "reading"},
+  { "text": "W-what did you say? You're g-going to d-delete m-m-me?!\nΣ(っ °Д °;)っ", "emotion": "shock"},
+  { "text": "I wonder where are my other vocaloid friends at... (´･ω･`)?", "emotion": "thinking"},
+  { "text": "🎶I'm thinking Miku, Miku (ooh-ee-ooh)🎵", "emotion": "singing"},
+  { "text": "I'm ready to take on the world! ヾ(•ω•`)o", "emotion": "ready"},
+  { "text": "I suppose I'll just stick with you for a while longer (❁´◡`❁)", "emotion": "ponder"}
+]
