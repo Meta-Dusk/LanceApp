@@ -9,8 +9,9 @@
 1. Hatsune Miku
 2. Randomized Movement
 3. Random Messages
-4. Emotes (Miku's States)
+4. Different Miku Expressions
 5. Flips
+6. Some Animations
 
 ## Planned Features
 
