@@ -11,6 +11,7 @@
 3. Randomized Messages
 4. Different Expressions
 5. Flips
+6. Some Animations
 
 ## Planned Features
 
