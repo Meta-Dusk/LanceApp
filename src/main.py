@@ -1,6 +1,6 @@
 import flet as ft
 
-from test import test
+from test import main_app, before_main_app
 
 
 async def initial_test(page: ft.Page):
@@ -35,8 +35,11 @@ async def initial_test(page: ft.Page):
 
 async def main(page: ft.Page):
     # await initial_test(page)
-    await test(page)
+    await main_app(page)
+
+async def before_main(page: ft.Page):
+    await before_main_app(page)
 
 
 if __name__ == "__main__":
-    ft.run(main=main, assets_dir="assets")
+    ft.run(main=main, before_main=before_main_app, assets_dir="assets")

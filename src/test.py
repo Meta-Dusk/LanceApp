@@ -10,11 +10,35 @@ from utilities import (
 )
 
 
-async def test(page: ft.Page):
-    # -------- Setup --------
-    DEBUG = False
-    transparent_window(page, height=260, debug=DEBUG)
+DEBUG = False
 
+
+async def before_main_app(page: ft.Page):
+    # -------- Before Main App --------
+    transparent_window(page, height=260, debug=DEBUG)
+    
+    # Window position
+    monitors = get_all_monitors()
+    if monitors:
+        primary = monitors[0]
+        page.window.left = primary.x + (primary.width - page.window.width) / 2
+        page.window.top = primary.y + primary.height - page.window.height
+    
+    # Attach global page/window handlers before main starts.
+    def on_keyboard_event(e: ft.KeyboardEvent):
+        # Keep it minimal here, actual logic handled in main
+        debug_msg(f"Keyboard event captured: {e.key}", debug=True)
+
+    def on_window_event(e: ft.WindowEvent):
+        # Same here, lightweight placeholder
+        debug_msg(f"Window event captured: {e.type}", debug=True)
+
+    page.on_keyboard_event = on_keyboard_event
+    page.window.on_event = on_window_event
+    
+
+async def main_app(page: ft.Page):
+    # -------- Setup --------
     stop_event = asyncio.Event()
     restart_timer: asyncio.Task | None = None
     speech_timer: asyncio.Task | None = None
@@ -22,13 +46,6 @@ async def test(page: ft.Page):
     speech_bubble = None
     miku_mv_freq_ms = (1000, 1500)
     miku_mv_step = (-100, 100)
-
-    # Window position
-    monitors = get_all_monitors()
-    if monitors:
-        primary = monitors[0]
-        page.window.left = primary.x + (primary.width - page.window.width) / 2
-        page.window.top = primary.y + primary.height - page.window.height
 
     # -------- Task Helpers --------
     def cancel_task(task: asyncio.Task | None):
@@ -278,4 +295,4 @@ async def test(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=test)
+    ft.app(target=main_app)
