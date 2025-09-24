@@ -14,5 +14,4 @@ def default_speech_bubble(msg: str) -> ft.Container:
         padding=10, border_radius=15, left=0, right=0, top=0,
         border=ft.Border.all(4, ft.Colors.with_opacity(0.7, ft.Colors.BLUE_900)),
         alignment=ft.Alignment.TOP_CENTER,
-        offset=ft.Offset(0.0, -0.5),
     )

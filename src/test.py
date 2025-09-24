@@ -406,10 +406,12 @@ async def main_app(page: ft.Page):
         on_long_press_start=on_long_press_start,
         on_long_press_end=on_long_press_end,
         on_secondary_tap=on_secondary_tap,
+        expand=True
     )
     
     form = ft.WindowDragArea(
-        content=miku_gs, maximizable=False, on_drag_start=on_drag_start
+        content=miku_gs, maximizable=False, on_drag_start=on_drag_start,
+        expand=True
     )
 
     page.window.on_event = on_event

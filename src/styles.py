@@ -15,7 +15,6 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.bgcolor = ft.Colors.TRANSPARENT
     page.padding = 0
     page.fonts = {font: get_font_path(font.value) for font in FontStyles}
-    page.vertical_alignment = ft.MainAxisAlignment.END
 
     page.window.bgcolor = ft.Colors.TRANSPARENT
     page.window.title_bar_hidden = True
