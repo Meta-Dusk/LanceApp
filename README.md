@@ -1,8 +1,38 @@
 # A Desktop Assistant App made especially for Marcus Lance
 
-> **Happy Birthday, Marcus Lance!**
->
+**Happy Birthday, Marcus Lance!**
+
 > Started on September 22, 2025
+
+## Controls
+
+> This section will be removed once the menu feature has been implemented.
+> The controls being referred here are for interacting with Miku, or used directly on her.
+
+- Left-click: Default interaction.
+- Right-click: Placeholder interaction; will open a menu soon, but for now, it will only say how to exit.
+- Double-click (left-click): Exits the application.
+- Left-click and drag: Will move Miku around.
+
+## Known Issues and Fixes
+
+Please do report any issues found that are not solvable with the fixes provided below:
+
+### Fix 1
+Relaunch the app.
+
+### Fix 2
+Move Miku around your screen, then stop.
+
+### The Known Issues
+
+1. When launching the app for the first time, there could be an issue with the window, where it will look stretched, and the speech bubble is clipped. Please refer to [Fix 1](#fix-1).
+2. A border around Miku appears during app launch; refer to [Fix 1](#fix-1).
+3. Miku suddenly stops her idle animation; refer to [Fix 2](#fix-2).
+4. Miku appears to be stretched and/or the speech bubble is clipped or stretched; refer to [Fix 1](#fix-1).
+
+> In conclusion, most issues that may arise, are solvable by either:
+> Relaunching the app, or dragging Miku around, then stopping.
 
 ## Features
 
