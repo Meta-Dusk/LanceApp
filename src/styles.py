@@ -1,14 +1,20 @@
 import flet as ft
 
 from pathlib import Path
+from enum import Enum
 
 
-def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False):
+class FontStyles(Enum):
+    BLRRPIX = "blrrpixs016.ttf"
+
+def get_font_path(font_style: str) -> str:
+    return str(Path("fonts") / font_style)
+
+
+def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False) -> None:
     page.bgcolor = ft.Colors.TRANSPARENT
     page.padding = 0
-    page.fonts = {
-        "BlrrPix": str(Path("fonts") / "blrrpixs016.ttf")
-    }
+    page.fonts = {font: get_font_path(font.value) for font in FontStyles}
     page.vertical_alignment = ft.MainAxisAlignment.END
 
     page.window.bgcolor = ft.Colors.TRANSPARENT

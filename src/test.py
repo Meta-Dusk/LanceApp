@@ -3,7 +3,8 @@ import random
 import asyncio
 import math
 
-from styles import transparent_window
+from typing import Optional
+from styles import transparent_window, FontStyles
 from images import DynamicMiku, Miku
 from utilities import (
     get_all_monitors, check_and_adjust_bounds, random_line,
@@ -41,7 +42,7 @@ async def before_main_app(page: ft.Page):
 async def main_app(page: ft.Page):
     # -------- Setup --------
     # Task Flags for Loops
-    stop_event = asyncio.Event()
+    stop_event = asyncio.Event() # Used to control movement loop only
     restart_timer: asyncio.Task | None = None
     speech_timer: asyncio.Task | None = None
     movement_task: asyncio.Task | None = None
@@ -58,7 +59,8 @@ async def main_app(page: ft.Page):
     # Idle Animation
     idle_running = False
     idle_phase = 0.0
-    idle_amp = 1  # pixels up/down (tweak for subtlety)
+    idle_amp = 4  # pixels up/down (tweak for subtlety)
+    idle_base_top = page.window.top  # baseline for idle bobbing
 
     # -------- Task Helpers --------
     def cancel_task(task: asyncio.Task | None):
@@ -81,7 +83,7 @@ async def main_app(page: ft.Page):
         movement_task = asyncio.create_task(movement_loop())
 
     def cancel_loop():
-        stop_event.set()
+        stop_event.set() # Stops movement loop
         cancel_task(movement_task)
         debug_msg("Stopping Movement Loop :: Cancelled Loop", debug=DEBUG)
 
@@ -145,6 +147,7 @@ async def main_app(page: ft.Page):
         stop_idle_bobbing()
         
         if step == 0:
+            start_idle_bobbing()
             return
 
         # Flip sprite based on direction
@@ -171,7 +174,8 @@ async def main_app(page: ft.Page):
 
         for i in range(frames):
             if stop_event.is_set() or main_miku.is_pan_start():
-                break
+                start_idle_bobbing()
+                return
 
             # Ease-out interpolation
             t = i / frames
@@ -192,29 +196,29 @@ async def main_app(page: ft.Page):
         # Snap to target to avoid drift
         page.window.left = target_left
         page.window.top = round(page.window.top)  # reset jiggle rounding
-        page.window.update()
 
+        # Reset baseline for idle bobbing
+        nonlocal idle_base_top
+        idle_base_top = page.window.top
+        page.window.update()
+        
         check_and_adjust_bounds(page)
         start_idle_bobbing()
     
     # -------- Idle Animation --------
     async def idle_bobbing_loop():
-        """Continuous up-and-down bobbing animation when idle."""
-        nonlocal idle_phase, idle_running
+        nonlocal idle_phase, idle_running, idle_base_top
         idle_running = True
 
         while not stop_event.is_set():
-            # Always use current top as baseline so bobbing stays relative
-            base_top = page.window.top  
-
-            # Smooth sine-wave offset
+            # Smooth sine-wave offset from baseline
             offset = math.sin(idle_phase) * idle_amp
-            page.window.top = base_top + offset
+            page.window.top = idle_base_top + offset
             page.window.update()
 
             await asyncio.sleep(1 / 60)  # ~60fps
-            idle_phase += 0.08  # frequency of bobbing
-            if idle_phase > math.tau:  # keep phase bounded
+            idle_phase += 0.08
+            if idle_phase > math.tau:
                 idle_phase -= math.tau
 
         idle_running = False
@@ -243,7 +247,12 @@ async def main_app(page: ft.Page):
             speech_bubble = None
             page.update()
 
-    def miku_chat(msg: str | None = None, emote: Miku | None = None, exit: bool = False):
+    def miku_chat(
+        msg: Optional[str] = None,
+        emote: Optional[Miku] = None,
+        exit: bool = False,
+        duration: int = 2
+    ):
         nonlocal speech_bubble, speech_timer
         random_chat = random_line(speech_lines)
         chat: str = random_chat["text"]
@@ -257,7 +266,7 @@ async def main_app(page: ft.Page):
         else:
             speech_bubble = ft.Container(
                 content=ft.Text(
-                    value=chat if msg is None else msg, font_family="BlrrPix",
+                    value=chat if msg is None else msg, font_family=FontStyles.BLRRPIX,
                     size=16, text_align=ft.TextAlign.CENTER
                 ),
                 bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE),
@@ -272,11 +281,10 @@ async def main_app(page: ft.Page):
             getattr(Miku, emotion.upper(), emotion) if emote is None else emote
         )
         page.update()
-
+        
         if not exit:
-
             async def speech_remover():
-                await asyncio.sleep(2)
+                await asyncio.sleep(duration)
                 await remove_speech()
 
             speech_timer = asyncio.create_task(speech_remover())
