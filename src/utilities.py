@@ -54,18 +54,20 @@ def clamp_to_monitor(m: screeninfo.Monitor, left: float, top: float, width: floa
     return int(clamped_left), int(clamped_top)
 
 def check_and_adjust_bounds(page: ft.Page):
+    window: ft.Window = page.window
+    
     m = get_monitor_for_window(
-        page.window.left, page.window.top, page.window.width, page.window.height
+        window.left, window.top, window.width, window.height
     )
     if not m:
         return
 
     clamped_left, clamped_top = clamp_to_monitor(
-        m, page.window.left, page.window.top, page.window.width, page.window.height
+        m, window.left, window.top, window.width, window.height
     )
-    if clamped_left != page.window.left or clamped_top != page.window.top:
-        page.window.left, page.window.top = clamped_left, clamped_top
-        page.update()
+    if clamped_left != window.left or clamped_top != window.top:
+        window.left, window.top = clamped_left, clamped_top
+        window.update()
         
 def load_lines(file_path: str) -> list[dict]:
     with open(file_path, "r", encoding="utf-8") as f:

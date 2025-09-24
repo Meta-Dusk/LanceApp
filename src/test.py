@@ -1,6 +1,7 @@
 import flet as ft
 import random
 import asyncio
+import math
 
 from styles import transparent_window
 from images import DynamicMiku, Miku
@@ -10,7 +11,7 @@ from utilities import (
 )
 
 
-DEBUG = False
+DEBUG = True
 
 
 async def before_main_app(page: ft.Page):
@@ -39,13 +40,25 @@ async def before_main_app(page: ft.Page):
 
 async def main_app(page: ft.Page):
     # -------- Setup --------
+    # Task Flags for Loops
     stop_event = asyncio.Event()
     restart_timer: asyncio.Task | None = None
     speech_timer: asyncio.Task | None = None
     movement_task: asyncio.Task | None = None
+    idle_task: asyncio.Task | None = None
+    
+    # Controls
     speech_bubble = None
+    
+    ## Variables
+    # Movement
     miku_mv_freq_ms = (1000, 1500)
     miku_mv_step = (-100, 100)
+    
+    # Idle Animation
+    idle_running = False
+    idle_phase = 0.0
+    idle_amp = 1  # pixels up/down (tweak for subtlety)
 
     # -------- Task Helpers --------
     def cancel_task(task: asyncio.Task | None):
@@ -105,9 +118,10 @@ async def main_app(page: ft.Page):
 
             if not main_miku.is_pan_start():
                 if rnd_step > 80 or rnd_step < -80:
-                    move_miku(rnd_delay, 3.14 * 2)
+                    rnd_rotation = math.pi * 2 * math.copysign(1, rnd_step)
+                    await move_miku_smooth(rnd_delay, rotate=rnd_rotation)
                 else:
-                    move_miku(rnd_step)
+                    await move_miku_smooth(rnd_step)
 
     def move_miku(step: int, rotate: float | None = None):
         if step > 0:
@@ -122,7 +136,105 @@ async def main_app(page: ft.Page):
         check_and_adjust_bounds(page)
         page.update()
         page.window.update()
+    
+    async def move_miku_smooth(
+        step: int, rotate: float | None = None,
+        base_duration: float = 0.2, fps: int = 60
+    ):
+        """Smoothly animate the OS window horizontally with ease-out curve and jiggle."""
+        stop_idle_bobbing()
+        
+        if step == 0:
+            return
 
+        # Flip sprite based on direction
+        if step > 0:
+            main_miku.set_flipped(False)
+        else:
+            main_miku.set_flipped(True)
+
+        # Add playful rotation
+        main_miku_img.rotate = ft.Rotate(0.1 * (abs(step) / 100)) if rotate is None else rotate
+        page.update()
+
+        # Dynamic duration scaling
+        duration = base_duration + (abs(step) / 300)  # larger step = slower glide
+        frames = int(duration * fps)
+
+        # Current positions
+        start_left = page.window.left
+        target_left = start_left + step
+
+        # Jiggle amplitude
+        jiggle_amp = 3  # pixels
+        jiggle_freq = 2 * math.pi / frames  # one small oscillation
+
+        for i in range(frames):
+            if stop_event.is_set() or main_miku.is_pan_start():
+                break
+
+            # Ease-out interpolation
+            t = i / frames
+            eased_t = 1 - (1 - t) ** 3  # cubic ease-out
+
+            # Horizontal movement
+            new_left = start_left + (step * eased_t)
+
+            # Vertical jiggle
+            new_top = page.window.top + math.sin(i * jiggle_freq) * jiggle_amp
+
+            page.window.left = new_left
+            page.window.top = new_top
+            page.window.update()
+
+            await asyncio.sleep(1 / fps)
+
+        # Snap to target to avoid drift
+        page.window.left = target_left
+        page.window.top = round(page.window.top)  # reset jiggle rounding
+        page.window.update()
+
+        check_and_adjust_bounds(page)
+        start_idle_bobbing()
+    
+    # -------- Idle Animation --------
+    async def idle_bobbing_loop():
+        """Continuous up-and-down bobbing animation when idle."""
+        nonlocal idle_phase, idle_running
+        idle_running = True
+
+        while not stop_event.is_set():
+            # Always use current top as baseline so bobbing stays relative
+            base_top = page.window.top  
+
+            # Smooth sine-wave offset
+            offset = math.sin(idle_phase) * idle_amp
+            page.window.top = base_top + offset
+            page.window.update()
+
+            await asyncio.sleep(1 / 60)  # ~60fps
+            idle_phase += 0.08  # frequency of bobbing
+            if idle_phase > math.tau:  # keep phase bounded
+                idle_phase -= math.tau
+
+        idle_running = False
+
+
+    def start_idle_bobbing():
+        nonlocal idle_task
+        debug_msg(msg="Idle bobbing started", handler="Miku", debug=DEBUG)
+        if idle_task and not idle_task.done():
+            return
+        idle_task = asyncio.create_task(idle_bobbing_loop())
+
+
+    def stop_idle_bobbing():
+        nonlocal idle_task
+        if idle_task and not idle_task.done():
+            debug_msg(msg="Idle bobbing stopped", handler="Miku", debug=DEBUG)
+            idle_task.cancel()
+            idle_task = None
+    
     # -------- Speech Feature --------
     async def remove_speech():
         nonlocal speech_bubble
@@ -290,8 +402,8 @@ async def main_app(page: ft.Page):
     page.add(form)
 
     check_and_adjust_bounds(page)
-    page.update()
     start_loop()
+    start_idle_bobbing()
 
 
 if __name__ == "__main__":
