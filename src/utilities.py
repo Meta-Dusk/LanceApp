@@ -3,6 +3,7 @@ import flet as ft
 import screeninfo
 import random
 import json
+import asyncio
 
 from typing import Optional
 from pathlib import Path
@@ -11,6 +12,7 @@ from pathlib import Path
 LINES_PATH = Path(__file__).resolve().parent / "assets" / "data" / "miku_speech.json"
 
 
+# -------- Monitor Functions --------
 def get_all_monitors():
     try:
         return screeninfo.get_monitors()
@@ -68,7 +70,9 @@ def check_and_adjust_bounds(page: ft.Page):
     if clamped_left != window.left or clamped_top != window.top:
         window.left, window.top = clamped_left, clamped_top
         window.update()
-        
+
+
+# -------- Data Loaders --------
 def load_lines(file_path: str) -> list[dict]:
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)  # returns a list of dicts
@@ -78,6 +82,22 @@ def random_line(lines: list[dict]) -> dict:
 
 speech_lines = load_lines(LINES_PATH)
 
+
+# -------- Debug Stuff --------
 def debug_msg(msg: str, handler: str = "DEBUG", debug: bool = False):
     if debug:
         print(f"[{handler}] {msg}")
+        
+        
+# -------- Task Helpers --------
+def cancel_task(task: asyncio.Task | None):
+    if task and not task.done():
+        task.cancel()
+
+async def await_task_completion(task: asyncio.Task | None):
+    if task and not task.done():
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
