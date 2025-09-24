@@ -29,7 +29,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     miku_mv_freq_ms: Tuple[int, int] = (1000, 1500)  # Frequency of randomized Miku movement
     miku_mv_step: Tuple[int, int] = (-100, 100)      # Range of randomized Miku movement
     miku_rt_mod: float = 0.3                         # Rotation modifier for Miku flip
-    miku_flip_chance: int = 20                       # Chance of Miku flip out of 100%
+    miku_flip_chance: int = 5                        # Chance of Miku flip out of 100%
     fps: float = 60.0
     
     # Idle Animation
@@ -96,9 +96,9 @@ async def main_app(page: ft.Page, debug: bool = False):
             if not main_miku.is_pan_start():
                 if chance(miku_flip_chance):
                     rnd_rotation = math.pi * 2 * math.copysign(1, rnd_step)
-                    await move_miku_smooth(step=rnd_step, rotate=rnd_rotation, base_duration=1)
+                    await move_miku_smooth(step=rnd_step, rotate=rnd_rotation, base_duration=rnd_delay)
                 else:
-                    await move_miku_smooth(step=rnd_step)
+                    await move_miku_smooth(step=rnd_step, base_duration=rnd_delay * 0.25)
     
     async def move_miku_smooth(
         step: int, rotate: Optional[float] = None,
@@ -329,10 +329,10 @@ async def main_app(page: ft.Page, debug: bool = False):
         delay: float
         local_position: ft.Offset = e.local_position
         
-        if is_within_radius(center=ft.Offset(x=141.0, y=193.0), point=local_position, radius=25):
+        if is_within_radius(center=ft.Offset(x=141.0, y=210.0), point=local_position, radius=40):
             delay = miku_chat(msg="W-what are you doing?! ヽ（≧□≦）ノ", emote=Miku.SHOCK)
             
-        elif is_within_radius(center=ft.Offset(x=121.0, y=140.0), point=local_position, radius=50):
+        elif is_within_radius(center=ft.Offset(x=121.0, y=135.0), point=local_position, radius=50):
             delay = miku_chat(msg="I-I do like h-headpats (≧﹏ ≦)", emote=Miku.PONDER)
             
         else:

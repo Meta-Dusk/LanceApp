@@ -4,7 +4,7 @@ from styles import transparent_window
 from utilities import get_all_monitors, debug_msg
 
 
-def before_main_app(page: ft.Page, debug: bool = False):
+async def before_main_app(page: ft.Page, debug: bool = False):
     # -------- Before Main App --------
     transparent_window(page, height=260, debug=debug)
     

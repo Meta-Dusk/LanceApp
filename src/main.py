@@ -38,11 +38,11 @@ async def initial_test(page: ft.Page):
     )
 
 
-async def main(page: ft.Page, debug: bool = DEBUG):
-    await main_app(page, debug)
+async def main(page: ft.Page):
+    await main_app(page=page, debug=DEBUG)
 
-def before_main(page: ft.Page, debug: bool = DEBUG):
-    before_main_app(page, debug)
+async def before_main(page: ft.Page):
+    await before_main_app(page=page, debug=DEBUG)
 
 
 if __name__ == "__main__":

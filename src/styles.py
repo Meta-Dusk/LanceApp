@@ -15,7 +15,8 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.bgcolor = ft.Colors.TRANSPARENT
     page.padding = 0
     page.fonts = {font: get_font_path(font.value) for font in FontStyles}
-
+    page.decoration = ft.BoxDecoration(border_radius=10, border=ft.Border.all(2, ft.Colors.PRIMARY)) if debug else None
+    
     page.window.bgcolor = ft.Colors.TRANSPARENT
     page.window.title_bar_hidden = True
     page.window.always_on_top = True
@@ -23,10 +24,12 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.window.resizable = False
     page.window.width = width
     page.window.height = height
-    page.decoration = ft.BoxDecoration(border_radius=10, border=ft.Border.all(2, ft.Colors.PRIMARY)) if debug else None
+    
+    # page.update()
     # page.appbar = ft.AppBar(
     #     actions=[
     #         ft.IconButton(ft.Icons.CHAT_BUBBLE, on_click=on_chat)
     #     ], bgcolor=ft.Colors.TRANSPARENT, toolbar_height=40,
     #     # title=ft.Text("Hatsune Miku"), center_title=True
     # )
+    
