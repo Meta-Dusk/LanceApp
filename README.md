@@ -54,3 +54,7 @@ Move Miku around your screen, then stop.
 5. More Custom Messages
 6. Minigames
 7. Make her an actual "Desktop Assistant" and not just a pet
+
+## Unintended Behaviors
+
+- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker, Mikus Galore (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)
