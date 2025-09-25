@@ -30,6 +30,8 @@ Move Miku around your screen, then stop.
 2. A border around Miku appears during app launch; refer to [Fix 1](#fix-1).
 3. Miku suddenly stops her idle animation; refer to [Fix 2](#fix-2).
 4. Miku appears to be stretched and/or the speech bubble is clipped or stretched; refer to [Fix 1](#fix-1).
+5. After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but not fix yet.
+6. Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds, and no fix yet.
 
 > In conclusion, most issues that may arise, are solvable by either:
 > Relaunching the app, or dragging Miku around, then stopping.
@@ -50,3 +52,5 @@ Move Miku around your screen, then stop.
 3. Proper Menu
 4. Settings Menu
 5. More Custom Messages
+6. Minigames
+7. Make her an actual "Desktop Assistant" and not just a pet
