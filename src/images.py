@@ -174,6 +174,7 @@ async def test(page: ft.Page):
         
         if key == "A":
             page.window.left -= step
+            page.window.width += step
         if key == "D":
             page.window.left += step
         if key == "W":
