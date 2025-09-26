@@ -30,6 +30,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     enable_mv_override: bool = False
     show_movement_logs: bool = False
     exit_app: bool = False
+    open_menu: bool = False
     
     # Movement
     miku_mv_freq_ms: Tuple[int, int] = (1000, 1500)  # Frequency of randomized Miku movement
@@ -53,7 +54,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     exit_timer: ResettableTimer = None
     
     # -------- Window Functions --------
-    async def to_front_with_delay(delay: float = 0.2):
+    async def to_front_with_delay(delay: float = 1):
         debug_msg(f"Bringing Miku to the front for {delay}s", debug=False)
         page.window.always_on_top = True
         await asyncio.sleep(delay)
@@ -69,7 +70,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         debug_msg("Starting Movement Loop :: Starting Loop", debug=show_movement_logs)
         movement_task = asyncio.create_task(movement_loop())
 
-    def cancel_movement_loop() -> None:
+    def stop_movement_loop() -> None:
         """Stops movement loop."""
         stop_event.set()
         cancel_task(movement_task)
@@ -79,7 +80,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         """If `delay <= 0` then cancel, and `delay` is in seconds."""
         nonlocal restart_timer
         cancel_task(restart_timer)
-        cancel_movement_loop()
+        stop_movement_loop()
         
         if delay <= 0:
             debug_msg(f"Cancelling restart loop since delay={delay}", debug=debug)
@@ -100,7 +101,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         """Handles the movement loop for Miku."""
         nonlocal miku_flip_chance, miku_mv_freq_ms, miku_mv_step, enable_mv_override
         
-        while not stop_event.is_set() and not enable_mv_override:
+        while not stop_event.is_set() and not enable_mv_override and not open_menu:
             if main_miku.is_pan_start():
                 debug_msg("Stopping Movement Loop :: Miku is being dragged!", debug=show_movement_logs)
                 break
@@ -185,10 +186,10 @@ async def main_app(page: ft.Page, debug: bool = False):
         idle_base_top = page.window.top
         page.window.update()
         
-        await to_front_with_delay(delay=0.1)
+        start_idle_bobbing()
+        await to_front_with_delay()
         
         check_and_adjust_bounds(page)
-        start_idle_bobbing()
         
         if chance(10):
             miku_chat()
@@ -298,7 +299,7 @@ async def main_app(page: ft.Page, debug: bool = False):
             enable_mv_override = not enable_mv_override
             
             if enable_mv_override:
-                cancel_movement_loop()
+                stop_movement_loop()
                 miku_chat(
                     msg="S-something's wrong... I seem to can't move on my own anymore? (´。＿。｀)",
                     emote=Miku.SHOCK
@@ -369,14 +370,16 @@ async def main_app(page: ft.Page, debug: bool = False):
             not main_miku.is_pan_start()
             and not main_miku.is_long_pressed()
             and not stop_event.is_set()
+            and not exit_app
         ):
             main_miku.set_state(Miku.NEUTRAL)
     
     async def on_tap_down(e: ft.TapEvent):
-        nonlocal interaction_increment, interaction_timer
+        nonlocal interaction_increment, interaction_timer, exit_app
         delay: float = 2
         local_position: ft.Offset = e.local_position
-        cancel_movement_loop()
+        stop_movement_loop()
+        exit_app = False
         
         if is_within_radius(center=ft.Offset(x=141.0, y=210.0), point=local_position, radius=40):
             # print(interaction_increment)
@@ -415,8 +418,25 @@ async def main_app(page: ft.Page, debug: bool = False):
         
     
     #TODO: Implement a sub-menu for Miku
-    async def on_double_tap(_) -> None: # Placeholder interaction for exitting application
-        await exit_miku()
+    async def on_double_tap(_) -> None:
+        nonlocal open_menu
+        
+        if not open_menu:
+            stop_idle_bobbing()
+            stop_movement_loop()
+            page.window.height += 40
+            page.window.width += 400
+            page.window.top -= 40
+            
+        else:
+            page.window.width -= 400
+            page.window.height -= 40
+            page.window.top += 40
+            restart_loop_after_delay(3)
+        
+        page.window.update()
+        start_idle_bobbing()
+        open_menu = not open_menu
 
     async def on_secondary_tap(_) -> None: # When user right-clicks (or secondary) Miku
         nonlocal exit_timer, exit_app
@@ -437,7 +457,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         
         exit_timer.start()
             
-        cancel_movement_loop()
+        stop_movement_loop()
         restart_loop_after_delay(delay)
         
         await exit_timer.expired.wait()
@@ -475,7 +495,7 @@ async def main_app(page: ft.Page, debug: bool = False):
                 ("Don't forget to review! ヾ(≧▽≦*)o", Miku.ECSTATIC),
             ]), duration=0)
             
-        cancel_movement_loop()
+        stop_movement_loop()
         debug_msg("Bye bye...", handler="Miku", debug=debug)
 
         main_miku_img.animate_scale = ft.Animation(exit_animation_duration_ms, ft.AnimationCurve.EASE_IN_OUT)
@@ -511,7 +531,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         on_tap_down=on_tap_down,
         on_long_press_start=on_long_press_start,
         on_long_press_end=on_long_press_end,
-        # on_secondary_tap=on_secondary_tap,
+        on_secondary_tap=on_secondary_tap,
         expand=True
     )
     

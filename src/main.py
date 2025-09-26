@@ -4,7 +4,7 @@ from main_ui import main_app
 from setup import before_main_app
 
 
-DEBUG = False
+DEBUG = True
 
 
 async def main(page: ft.Page):

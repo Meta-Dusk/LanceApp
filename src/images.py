@@ -150,35 +150,67 @@ def generate_image(image_data: ImageData) -> ft.Image:
 Run test for images.py with:
 py -m src.images
 """
-async def test(page: ft.Page):
-    def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False):
-        page.bgcolor = ft.Colors.TRANSPARENT
-        page.padding = 0
+async def before_test(page: ft.Page):
+    page.bgcolor = ft.Colors.TRANSPARENT
+    page.padding = 0
 
-        page.window.bgcolor = ft.Colors.TRANSPARENT
-        page.window.title_bar_hidden = True
-        page.window.always_on_top = True
-        page.window.frameless = True
-        page.window.resizable = False
-        page.window.width = width
-        page.window.height = height
-        page.decoration = ft.BoxDecoration(border_radius=10, border=ft.border.all(2, ft.Colors.PRIMARY)) if debug else None
-    
-    # transparent_window(page, debug=True)
-    page.horizontal_alignment = ft.MainAxisAlignment.CENTER
-    page.vertical_alignment = ft.CrossAxisAlignment.CENTER
+    page.window.bgcolor = ft.Colors.TRANSPARENT
+    page.window.title_bar_hidden = True
+    page.window.always_on_top = True
+    page.window.frameless = True
+    page.window.resizable = False
+    page.window.width = 258 * 2
+    page.window.height = 210 * 2
+    page.decoration = ft.BoxDecoration(border_radius=10, border=ft.Border.all(2, ft.Colors.PRIMARY))
     await page.window.center()
+    page.update()
 
-    miku = DynamicMiku(Miku.NEUTRAL, debug=True)
-    # miku.print()
+async def test(page: ft.Page):
+    await before_test(page)
     
-    # for data in Miku:
-    #     print(f"{data.name}: {data.value}\n")
+    async def on_keyboard_event(e: ft.KeyboardEvent):
+        key = e.key
+        step = 100
+        
+        if key == "A":
+            page.window.left -= step
+        if key == "D":
+            page.window.left += step
+        if key == "W":
+            page.window.top -= step
+        if key == "S":
+            page.window.top += step
+        if key == "Escape":
+            await page.window.close()
+        
+        if key or key != "":
+            page.window.update()
     
-    stack = ft.Stack(controls=[miku.get_image()], alignment=ft.Alignment.CENTER)
+    miku = DynamicMiku(Miku.NEUTRAL)
+    miku_img = miku.get_image()
+    miku_column = ft.Column(
+        controls=[miku_img], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        alignment=ft.MainAxisAlignment.END
+    )
     
-    page.add(stack)
+    test_container = ft.Container(
+        content=ft.Row(
+            controls=[ft.Text("Hello", color=ft.Colors.ON_SECONDARY_CONTAINER)],
+            expand=True, alignment=ft.MainAxisAlignment.CENTER
+        ),
+        bgcolor=ft.Colors.SECONDARY_CONTAINER, padding=10, border_radius=20, border=ft.Border.all(3, ft.Colors.SECONDARY)
+    )
+    test_column = ft.Column(
+        controls=[test_container], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+    
+    stack = ft.Stack(controls=[miku_column, test_column], alignment=ft.Alignment.TOP_CENTER, expand=True)
+    container = ft.Container(content=stack, alignment=ft.Alignment.BOTTOM_CENTER, expand=True)
+    form = ft.WindowDragArea(content=container, maximizable=False, expand=True)
+    
+    page.add(form)
+    page.on_keyboard_event = on_keyboard_event
 
 
 if __name__ == "__main__":
-    ft.app(target=test)
+    ft.run(main=test)
