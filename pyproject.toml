@@ -1,6 +1,6 @@
 [project]
 name = "MikuMiku"
-version = "0.3.0"
+version = "0.4.0"
 description = "A Flet App Made for Lance"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.13"
@@ -22,7 +22,7 @@ copyright = "Copyright (C) 2025 MetaDusk"
 compile_app = true
 compile_packages = true
 cleanup_on_compile = true
-build_number = 6
+build_number = 7
 
 [tool.flet.assets]
 include = [

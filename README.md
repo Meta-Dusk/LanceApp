@@ -9,27 +9,34 @@
 > This section will be removed once the menu feature has been implemented.
 > The controls being referred here are for interacting with Miku, or used directly on her.
 
-- Left-click: Default interaction.
-- Right-click: Placeholder interaction; will open a menu soon, but for now, it will only say how to exit.
-- Double-click (left-click): Exits the application.
-- Left-click and drag: Will move Miku around.
+- **Left-click**: Default interaction. Click twice for a menu. Clicking then holding is a placeholder for now.
+- **Right-click**: Click twice to exit.
+- **Left-click + *drag***: Will move Miku around.
 
 ## Known Issues and Fixes
 
 Please do report any issues found that are not solvable with the fixes provided below:
 
 ### Fix 1
+
 Relaunch the app.
 
+> You can quickly exit by right-clicking Miku twice.
+
 ### Fix 2
+
 Move Miku around your screen, then stop.
+
+### Fix 3
+
+Open a menu. Refer to the [Controls](#controls) section.
 
 ### The Known Issues
 
-1. When launching the app for the first time, there could be an issue with the window, where it will look stretched, and the speech bubble is clipped. Please refer to [Fix 1](#fix-1).
+1. When launching the app for the first time, there could be an issue with the window, where it will look stretched, and the speech bubble is clipped. Please refer to [Fix 1](#fix-1) or [Fix 3](#fix-3).
 2. A border around Miku appears during app launch; refer to [Fix 1](#fix-1).
 3. Miku suddenly stops her idle animation; refer to [Fix 2](#fix-2).
-4. Miku appears to be stretched and/or the speech bubble is clipped or stretched; refer to [Fix 1](#fix-1).
+4. Miku appears to be stretched and/or the speech bubble is clipped or stretched; refer to [Fix 1](#fix-1) or [Fix 3](#fix-3).
 5. After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but **no fix yet**.
 6. Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds, and **no fix yet**.
 
@@ -44,6 +51,7 @@ Move Miku around your screen, then stop.
 4. Different Expressions
 5. Flips
 6. Some Animations
+7. Menus
 
 ## Planned Features
 
@@ -57,4 +65,4 @@ Move Miku around your screen, then stop.
 
 ## Unintended Behaviors
 
-- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker, Mikus Galore (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)
+- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker, **Mikus Galore** (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)
