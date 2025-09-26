@@ -5,9 +5,11 @@ import random
 import json
 import asyncio
 import math
+import ctypes
 
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, List
 from pathlib import Path
+from images import Miku
 
 
 LINES_PATH = Path(__file__).resolve().parent / "assets" / "data" / "miku_speech.json"
@@ -103,6 +105,7 @@ async def await_task_completion(task: asyncio.Task | None):
         except asyncio.CancelledError:
             pass
         
+        
 # -------- Math Stuff --------
 def is_within_radius(
     center: Union[ft.Offset, Tuple[float, float]],
@@ -152,3 +155,64 @@ def chance(percent: int) -> bool:
     if percent >= 100:
         return True
     return random.random() < (percent / 100.0)
+
+
+# -------- User Stuff --------
+def get_full_username():
+    GetUserNameEx = ctypes.windll.secur32.GetUserNameExW
+    NameDisplay = 3  # NameDisplay gives full name
+
+    size = ctypes.pointer(ctypes.c_ulong(0))
+    GetUserNameEx(NameDisplay, None, size)
+
+    name_buffer = ctypes.create_unicode_buffer(size.contents.value)
+    GetUserNameEx(NameDisplay, name_buffer, size)
+    return name_buffer.value
+
+
+# -------- Random Helpers --------
+def rnd_miku_chat(miku_chat_params: List[Tuple[str, Miku, Optional[float]]]) -> List[Tuple[str, Miku, Optional[float]]]:
+    """
+    Chooses a random index from the list of tuples, which represent the parameters of
+    the `miku_chat()` function. Make sure to unpack the tuple with `*` inside the function.
+    
+    Args:
+        miku_chat_params (list): This is a list of tuples, that contain a str (`msg`),
+        an emote `Miku` and an optional float for `duration`.
+        
+    Returns:
+        list: Use this inside the `miku_chat()` function, and make sure to unpack with `*`.
+    """
+    return random.choice(miku_chat_params)
+
+
+# -------- Timers --------
+class ResettableTimer:
+    def __init__(self, duration: float):
+        self.duration = duration
+        self._task = None
+        self._reset_event = asyncio.Event()
+        self.expired = asyncio.Event()  # <-- external event
+
+    async def _run(self):
+        while True:
+            try:
+                # Wait for reset OR timeout
+                await asyncio.wait_for(self._reset_event.wait(), timeout=self.duration)
+                self._reset_event.clear()
+            except asyncio.TimeoutError:
+                # Timer expired
+                self.expired.set()   # <-- signal expiration
+                break
+
+    def start(self):
+        self.expired.clear()  # clear old expiration
+        if self._task is None or self._task.done():
+            self._task = asyncio.create_task(self._run())
+        else:
+            self._reset_event.set()
+
+    def cancel(self):
+        if self._task and not self._task.done():
+            self._task.cancel()
+            self._task = None

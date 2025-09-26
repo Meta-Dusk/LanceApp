@@ -14,9 +14,8 @@ def error_container(msg: str) -> ft.Container:
     return ft.Container(
         content=ft.Text(value=msg, color=ft.Colors.ERROR),
         bgcolor=ft.Colors.ERROR_CONTAINER,
-        border_radius=20,
-        padding=5,
-        alignment=ft.Alignment.CENTER,
+        border_radius=20, padding=5,
+        alignment=ft.Alignment.CENTER
     )
 
 
@@ -48,15 +47,21 @@ class ImageData:
     error_content: ft.Control = field(default_factory=lambda: error_container("IMAGE ERROR"))
     fit: ft.BoxFit = ft.BoxFit.COVER
     gapless_playback: bool = True
+    expand: bool = False
+    anti_alias: bool = True
 
 
 @dataclass
 class MikuData(ImageData):
+    width: Optional[int] = 258
+    height: Optional[int] = 210
     anti_alias: bool = False
-    expand: bool = True
     error_content: ft.Control = field(default_factory=lambda: error_container("No Miku 😔"))
-    fit: ft.BoxFit = ft.BoxFit.FILL
-    data: Optional[dict] = None
+    data: Optional[dict] = field(default_factory=lambda: {
+        "flipped": False,
+        "pan_start": False,
+        "long_pressed": False
+    })
 
 
 class Miku(Enum):
@@ -86,12 +91,16 @@ class DynamicMiku:
 
     def _generate_image(self, miku_data):
         self._debug_msg("A miku has been made.")
-        return generate_miku(miku_data)
+        return generate_image(miku_data)
     
     def _debug_msg(self, msg: str):
         if self.debug:
             print(f"[Miku] {msg}")
     
+    
+    def print(self):
+        for attr in self.__dict__.items():
+            print(attr)
     
     def get_image(self) -> ft.Image:
         return self._image
@@ -130,30 +139,18 @@ class DynamicMiku:
 
 
 def generate_image(image_data: ImageData) -> ft.Image:
-    return ft.Image(
-        src=image_data.src,
-        width=image_data.width,
-        height=image_data.height,
-        error_content=image_data.error_content,
-        fit=image_data.fit,
-        gapless_playback=image_data.gapless_playback
-    )
+    """
+    Gets attributes of `image_data` as a `dict`, then unpacks them with `**`,
+    then assigns them to the args of `Image`.
+    """
+    return ft.Image(**image_data.__dict__)
 
 
-def generate_miku(miku_data: MikuData) -> ft.Image:
-    img = generate_image(miku_data)
-    img.expand = miku_data.expand
-    img.data = {
-        "flipped": False,
-        "pan_start": False,
-        "long_pressed": False
-    }
-    img.animate_opacity = ft.Animation(0)
-    img.anti_alias = miku_data.anti_alias
-    return img
-
-
-def test(page: ft.Page):
+"""
+Run test for images.py with:
+py -m src.images
+"""
+async def test(page: ft.Page):
     def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False):
         page.bgcolor = ft.Colors.TRANSPARENT
         page.padding = 0
@@ -170,14 +167,15 @@ def test(page: ft.Page):
     # transparent_window(page, debug=True)
     page.horizontal_alignment = ft.MainAxisAlignment.CENTER
     page.vertical_alignment = ft.CrossAxisAlignment.CENTER
-    page.window.center()
+    await page.window.center()
 
-    miku = generate_miku(Miku.AMGRY.value)
+    miku = DynamicMiku(Miku.NEUTRAL, debug=True)
+    # miku.print()
     
-    speech_bubble = generate_image(Sprites.SPEECH_BUBBLE.value)
-    speech_bubble.scale = 0.4
+    # for data in Miku:
+    #     print(f"{data.name}: {data.value}\n")
     
-    stack = ft.Stack(controls=[miku, speech_bubble], alignment=ft.alignment.center)
+    stack = ft.Stack(controls=[miku.get_image()], alignment=ft.Alignment.CENTER)
     
     page.add(stack)
 

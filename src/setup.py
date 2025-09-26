@@ -1,19 +1,29 @@
 import flet as ft
 
+from screeninfo import Monitor
+from typing import List
 from styles import transparent_window
 from utilities import get_all_monitors, debug_msg
 
+
+def set_win_pos_bc(monitors: List[Monitor], page: ft.Page):
+    if monitors:
+        primary = monitors[0] # Gets the primary monitor
+        window = page.window
+        
+        # Sets the window horizontally centered
+        window.left = primary.x + (primary.width - window.width) / 2
+        
+        # Sets the window vertically centered
+        window.top = primary.y + primary.height - window.height
 
 async def before_main_app(page: ft.Page, debug: bool = False):
     # -------- Before Main App --------
     transparent_window(page, height=260, debug=debug)
     
-    # Window position
+    # -- Set Window Position --
     monitors = get_all_monitors()
-    if monitors:
-        primary = monitors[0]
-        page.window.left = primary.x + (primary.width - page.window.width) / 2
-        page.window.top = primary.y + primary.height - page.window.height
+    set_win_pos_bc(monitors, page)
     
     # Attach global page/window handlers before main starts.
     def on_keyboard_event(e: ft.KeyboardEvent):
@@ -23,7 +33,9 @@ async def before_main_app(page: ft.Page, debug: bool = False):
     def on_window_event(e: ft.WindowEvent):
         # Same here, lightweight placeholder
         debug_msg(f"Window event captured: {e.type}", debug=True)
-
-    page.on_keyboard_event = on_keyboard_event
+    
+    if debug:
+        page.on_keyboard_event = on_keyboard_event
+    
     page.window.on_event = on_window_event
     page.update()

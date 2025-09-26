@@ -19,11 +19,15 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     
     page.window.bgcolor = ft.Colors.TRANSPARENT
     page.window.title_bar_hidden = True
-    page.window.always_on_top = True
+    page.window.always_on_top = False
     page.window.frameless = True
     page.window.resizable = False
+    page.window.minimizable = False
+    page.window.maximizable = False
+    page.window.shadow = False
     page.window.width = width
     page.window.height = height
+    page.window.alignment = ft.Alignment.BOTTOM_CENTER
     
     # page.update()
     # page.appbar = ft.AppBar(
