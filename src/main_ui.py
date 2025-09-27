@@ -9,7 +9,7 @@ from setup import set_win_pos_bc
 from components import default_speech_bubble, default_menu
 from images import DynamicMiku, Miku
 from utilities.data import speech_lines, random_line
-from utilities.timers import ResettableTimer
+from utilities.timers import ResettableTimer, DeltaTimer
 from utilities.tasks import cancel_task, await_task_completion
 from utilities.debug import get_full_username, debug_msg
 from utilities.helpers import rnd_miku_chat
@@ -27,38 +27,41 @@ async def main_app(page: ft.Page, debug: bool = False):
     idle_task: Optional[asyncio.Task] = None
     
     # Controls
-    speech_bubble: Optional[ft.Control] = None
+    speech_bubble = default_speech_bubble("")
     
     ## -- Variables --
     # Debug Stuff
-    enable_mv_override: bool = False
-    show_movement_logs: bool = False
-    show_idle_logs: bool = False
+    ENABLE_MV_OVERRIDE: bool = False
+    SHOW_MOVEMENT_LOGS: bool = False
+    SHOW_IDLE_LOGS: bool = False
     exit_app: bool = False
     open_menu: bool = False
-    allow_void_traversal: bool = False
+    ALLOW_VOID_TRAVERSAL: bool = False
+    is_miku_chatting: bool = False
+    disable: bool = False
     
     # Movement
-    miku_mv_freq_ms: Tuple[int, int] = (1000, 1500)  # Frequency of randomized Miku movement
-    miku_mv_step: Tuple[int, int] = (-300, 300)      # Range of randomized Miku movement
-    miku_rt_mod: float = 0.3                         # Rotation modifier for Miku flip
-    miku_flip_chance: int = 5                        # Chance of Miku flip out of 100%
-    miku_chat_chance: int = 20                       # Chance for Miku to randomly chat out of 100%
-    fps: float = 60.0                                # For smooth movement animation
+    MIKU_MV_FREQ_MS: Tuple[int, int] = (1000, 1500)  # Frequency of randomized Miku movement
+    MIKU_MV_STEP: Tuple[int, int] = (-300, 300)      # Range of randomized Miku movement
+    MIKU_RT_MOD: float = 0.3                         # Rotation modifier for Miku flip
+    MIKU_FLIP_CHANCE: int = 5                        # Chance of Miku flip out of 100%
+    MIKU_CHAT_CHANCE: int = 20                       # Chance for Miku to randomly chat out of 100%
+    FPS: float = 60.0                                # For smooth movement animation
     
     # Idle Animation
     idle_phase: float = 0.0
-    idle_amp: float = 4.0               # pixels up/down (tweak for subtlety)
+    IDLE_AMP: float = 4.0               # pixels up/down (tweak for subtlety)
     idle_base_top = page.window.top     # baseline for idle bobbing
     
     # Speech Values (in seconds)
-    msg_base_time: float = 2.0          # Minimum time to display
-    per_char_time: float = 0.005        # Tweak speed factor
+    MSG_BASE_TIME: float = 2.0          # Minimum time to display
+    PER_CHAR_TIME: float = 0.005        # Tweak speed factor
     
     # Timers for Stuff
     interaction_timer: ResettableTimer = None
     interaction_increment: int = 0
     exit_timer: ResettableTimer = None
+    global_timer: DeltaTimer = DeltaTimer(target_fps=FPS)
     
     # -------- Window Functions --------
     async def to_front_with_delay(delay: float = 1):
@@ -74,14 +77,14 @@ async def main_app(page: ft.Page, debug: bool = False):
         nonlocal movement_task
         cancel_task(movement_task)
         stop_event.clear()
-        debug_msg("Starting Movement Loop :: Starting Loop", debug=show_movement_logs)
+        debug_msg("Starting Movement Loop :: Starting Loop", debug=SHOW_MOVEMENT_LOGS)
         movement_task = asyncio.create_task(movement_loop())
 
     def stop_movement_loop() -> None:
         """Stops movement loop."""
         stop_event.set()
         cancel_task(movement_task)
-        debug_msg("Stopping Movement Loop :: Cancelled Loop", debug=show_movement_logs)
+        debug_msg("Stopping Movement Loop :: Cancelled Loop", debug=SHOW_MOVEMENT_LOGS)
 
     def restart_loop_after_delay(delay: float = 2.0) -> None:
         """If `delay <= 0` then cancel, and `delay` is in seconds."""
@@ -97,6 +100,9 @@ async def main_app(page: ft.Page, debug: bool = False):
 
         async def delayed_restart():
             await asyncio.sleep(delay)
+            if is_miku_chatting:
+                return
+            print("[delayed_restart] Setting to Neutral")
             miku.set_state(Miku.NEUTRAL)
             page.update()
             start_movement_loop()
@@ -106,90 +112,80 @@ async def main_app(page: ft.Page, debug: bool = False):
     # -------- Movement (Smooth OS Window Animation) --------
     async def movement_loop() -> None:
         """Handles the movement loop for Miku."""
-        while not stop_event.is_set() and not enable_mv_override and not open_menu:
+        while not stop_event.is_set() and not ENABLE_MV_OVERRIDE and not open_menu:
             if miku.is_pan_start():
-                debug_msg("Stopping Movement Loop :: Miku is being dragged!", debug=show_movement_logs)
+                debug_msg("Stopping Movement Loop :: Miku is being dragged!", debug=SHOW_MOVEMENT_LOGS)
                 break
 
-            rnd_delay = random.randint(*miku_mv_freq_ms) / 1000
-            debug_msg(f"Sleeping for {rnd_delay}s", handler="Miku", debug=show_movement_logs)
+            rnd_delay = random.randint(*MIKU_MV_FREQ_MS) / 1000
+            debug_msg(f"Sleeping for {rnd_delay}s", handler="Miku", debug=SHOW_MOVEMENT_LOGS)
             await asyncio.sleep(rnd_delay)
 
-            rnd_step = random.randint(*miku_mv_step)
-            debug_msg(f"Moving with {rnd_step}", handler="Miku", debug=show_movement_logs)
+            rnd_step = random.randint(*MIKU_MV_STEP)
+            debug_msg(
+                msg=f"Moving {rnd_step}px to the {"left" if rnd_step < 0 else "right"}.",
+                handler="Miku", debug=SHOW_MOVEMENT_LOGS
+            )
 
             if not miku.is_pan_start():
-                if chance(miku_flip_chance):
+                if chance(MIKU_FLIP_CHANCE):
                     rnd_rotation = math.pi * 2 * math.copysign(1, -rnd_step)
                     await move_miku_smooth(step=rnd_step, rotate=rnd_rotation, base_duration=rnd_delay)
                 else:
-                    await move_miku_smooth(step=rnd_step, base_duration=rnd_delay * 0.25)
+                    await move_miku_smooth(step=rnd_step, base_duration=rnd_delay * 0.5)
     
-    async def move_miku_smooth(
-        step: int, rotate: Optional[float] = None, base_duration: float = 0.2, fps: int = fps
-    ) -> None:
+    async def move_miku_smooth(step: int, rotate: Optional[float] = None, base_duration: float = 0.2) -> None:
         """Smoothly animate the OS window horizontally with ease-out curve and jiggle."""
         nonlocal idle_base_top
-        # pause idle while actively sliding
         stop_idle_bobbing()
         
         if step == 0:
-            # nothing to move; ensure idle is running again
-            start_idle_bobbing()
+            start_idle_bobbing() # nothing to move; ensure idle is running again
             return
 
         # Flip sprite based on direction
-        if step > 0:
-            miku.set_flipped(False)
-        else:
-            miku.set_flipped(True)
+        miku.set_flipped(step < 0)
 
-        # Add playful rotation
-        miku_img.rotate = ft.Rotate(miku_rt_mod * (abs(step) / 100)) if rotate is None else rotate
+        # Rotate towards target
+        miku_img.rotate = ft.Rotate(MIKU_RT_MOD * (abs(step) / 100)) if rotate is None else rotate
         page.update()
 
-        # Dynamic duration scaling
         duration = base_duration + (abs(step) / 300)  # larger step = slower glide
-        frames = max(1, int(duration * fps))
 
         # Current positions
         start_left = page.window.left
         target_left = start_left + step
 
-        # Jiggle amplitude and frequency
-        jiggle_amp = 3  # pixels
-        jiggle_freq = 2 * math.pi / frames  # one small oscillation
-
-        for i in range(frames):
+        jiggle_amp = 3
+        
+        elapsed = 0.0
+        while elapsed < duration:
+            dt = await global_timer.tick()
+            # print(f"[Animation::Movement] Waited for {round(dt, 2)}s or {int(dt*1000)}ms")
+            elapsed += dt
+            t = min(1.0, elapsed / duration)
+            
             if miku.is_pan_start():
-                # interrupted -> set new baseline to current top and resume idle
                 idle_base_top = page.window.top
                 start_idle_bobbing()
                 return
-
-            # Ease-out interpolation
-            t = i / frames
-            eased_t = 1 - (1 - t) ** 3  # cubic ease-out
-
-            # Horizontal movement
+            
+            eased_t = 1 - (1 - t) ** 3
             new_left = start_left + (step * eased_t)
-
-            # Compute vertical jiggle relative to the baseline (do NOT rebase each frame)
-            new_top = idle_base_top + math.sin(i * jiggle_freq) * jiggle_amp
+            jiggle = math.sin(t * math.tau) * jiggle_amp
+            new_top = idle_base_top + jiggle
 
             page.window.left = new_left
             page.window.top = new_top
             page.window.update()
 
-            await asyncio.sleep(1 / fps)
-
         # Snap to target to avoid drift
         page.window.left = target_left
         page.window.top = round(idle_base_top)  # reset jiggle rounding
-
+        page.window.update()
+        
         # Reset baseline for idle bobbing
         idle_base_top = page.window.top
-        page.window.update()
         
         start_idle_bobbing()
         await to_front_with_delay()
@@ -197,11 +193,8 @@ async def main_app(page: ft.Page, debug: bool = False):
         is_in_bounds = check_and_adjust_bounds(page, debug)
         if not is_in_bounds:
             debug_msg("Attempting to restore position...", debug=debug)
-            if not allow_void_traversal:
-                if step > 0:
-                    page.window.left += step
-                else:
-                    page.window.left -= step
+            if not ALLOW_VOID_TRAVERSAL:
+                page.window.left += step
                 page.window.update()
             else:
                 debug_msg("WARNING! Miku can move past monitor boundaries.", debug=debug)
@@ -222,36 +215,35 @@ async def main_app(page: ft.Page, debug: bool = False):
                     on_clicked=on_clicked
                 )
                 
-            miku_chat("W-woah... So that's what the void looks like (⊙_⊙;)", Miku.SHOCK)
+            await miku_chat("W-woah... So that's what the void looks like (⊙_⊙;)", Miku.SHOCK)
             
         else:
-            if chance(miku_chat_chance):
-                miku_chat()
+            if chance(MIKU_CHAT_CHANCE):
+                await miku_chat()
     
-    # ---- Idle Bobbing (Independent Lifecycle) ----    
+    
+    # ---- Idle Bobbing (Independent Lifecycle) ----
     async def idle_bobbing_loop() -> None:
-        """Handles the idle animation loop."""
-        nonlocal idle_phase
-        base_top = page.window.top
+        nonlocal idle_phase, idle_base_top
         
         miku_img.rotate = 0
         page.update()
         
         while not miku.is_pan_start() and not open_menu:
-            offset = math.sin(idle_phase) * idle_amp
-            page.window.top = base_top + offset
-            page.window.update()
-            idle_phase += 0.08
+            dt = await global_timer.tick()
             
+            idle_phase += IDLE_AMP * dt
             if idle_phase > math.tau:
                 idle_phase -= math.tau
                 
-            await asyncio.sleep(1 / fps)
-
+            offset = math.sin(idle_phase) * IDLE_AMP
+            page.window.top = idle_base_top + offset
+            page.window.update()
+            
     def start_idle_bobbing() -> None:
         """Starts the idle animation."""
         nonlocal idle_task
-        debug_msg(msg="Idle bobbing started", handler="Miku", debug=show_idle_logs)
+        debug_msg(msg="Idle bobbing started", handler="Miku", debug=SHOW_IDLE_LOGS)
         if idle_task and not idle_task.done():
             return
         idle_task = asyncio.create_task(idle_bobbing_loop())
@@ -260,28 +252,25 @@ async def main_app(page: ft.Page, debug: bool = False):
         """Stops the idle animation."""
         nonlocal idle_task
         if idle_task and not idle_task.done():
-            debug_msg(msg="Idle bobbing stopped", handler="Miku", debug=show_idle_logs)
+            debug_msg(msg="Idle bobbing stopped", handler="Miku", debug=SHOW_IDLE_LOGS)
             idle_task.cancel()
             idle_task = None
     
     # -------- Speech Feature --------
     async def remove_speech(delay: Optional[float] = None) -> None:
         """Removes all speech bubbles in use, with optional delay before deletion."""
-        nonlocal speech_bubble
+        nonlocal speech_bubble, is_miku_chatting
         
         if delay and delay > 0:
             await asyncio.sleep(delay)
-        
-        if speech_bubble and speech_bubble in speech_column.controls:
-            speech_column.controls.remove(speech_bubble)
-            speech_bubble = None
+            speech_bubble.opacity = 0
+            speech_bubble.offset = ft.Offset(x=0.0, y=1.0)
             page.update()
-        
-        miku.set_state(Miku.NEUTRAL)
-        # ensure bobbing continues after speech removed
-        start_idle_bobbing()
+            await asyncio.sleep(0.2)
+            miku.set_state(Miku.NEUTRAL)
+            is_miku_chatting = False
     
-    def miku_chat(msg: Optional[str] = None, emote: Optional[Miku] = None, duration: Optional[float] = None) -> float:
+    async def miku_chat(msg: Optional[str] = None, emote: Optional[Miku] = None, duration: Optional[float] = None) -> float:
         """
         Make Miku say something in a speech bubble.
         
@@ -293,56 +282,60 @@ async def main_app(page: ft.Page, debug: bool = False):
         Returns:
             float: The duration used for displaying the message.
         """
-        nonlocal speech_bubble, speech_timer, msg_base_time, per_char_time
+        nonlocal speech_bubble, speech_timer, is_miku_chatting
+        
+        is_miku_chatting = True
         random_chat = random_line(speech_lines)
         chat: str = random_chat["text"]
         emotion: str = random_chat["emotion"]
         
         # Dynamic duration fallback
         if duration is None:
-            dynamic_duration = msg_base_time + per_char_time * len(chat)
+            dynamic_duration = MSG_BASE_TIME + PER_CHAR_TIME * len(chat)
             duration = round(dynamic_duration, 3)
-
+            
         cancel_task(speech_timer)
-
-        if speech_bubble and speech_bubble in speech_column.controls:
-            speech_text: ft.Text = speech_bubble.content
-            speech_text.value = chat if msg is None else msg
-        else:
-            speech_bubble = default_speech_bubble(chat if msg is None else msg)
-            speech_column.controls.append(speech_bubble)
-
+        
+        speech_text: ft.Text = speech_bubble.content
+        speech_text.value = chat if msg is None else msg
+        speech_bubble.update()
+        
         miku.set_state(
             getattr(Miku, emotion.upper(), emotion) if emote is None else emote
         )
+        speech_bubble.offset = ft.Offset(x=0.0, y=0.0)
+        speech_bubble.opacity = 1
         page.update()
+        await asyncio.sleep(0.2)
         
         # ensure idle is running (idempotent) (Mr. GPT truly out here with technical jargon)
         start_idle_bobbing()
         
-        if duration > 0:
-            speech_timer = asyncio.create_task(remove_speech(duration))
+        debug_msg(f"Miku's chat will be shown {f"for {duration}s" if duration > 0 else "indefinitely"}.", debug=debug)
+        speech_timer = asyncio.create_task(remove_speech(duration)) if duration > 0 else None
         
         return duration
 
     # -------- Event Handlers --------
     async def on_keyboard_event(e: ft.KeyboardEvent) -> None:
-        nonlocal enable_mv_override
+        nonlocal ENABLE_MV_OVERRIDE
+        if exit_app:
+            return
         # print(f"Detected key press: {e.key}")
         if e.key == "`":
-            enable_mv_override = not enable_mv_override
+            ENABLE_MV_OVERRIDE = not ENABLE_MV_OVERRIDE
             
-            if enable_mv_override:
+            if ENABLE_MV_OVERRIDE:
                 stop_movement_loop()
-                miku_chat(
+                await miku_chat(
                     msg="S-something's wrong... I seem to can't move on my own anymore? (´。＿。｀)",
                     emote=Miku.SHOCK
                 )
             else:
                 start_movement_loop()
-                miku_chat(msg="I can move again now! (/≧▽≦)/", emote=Miku.JOY)
+                await miku_chat(msg="I can move again now! (/≧▽≦)/", emote=Miku.JOY)
             
-        if enable_mv_override:
+        if ENABLE_MV_OVERRIDE:
             step = 100
             if e.key == "D":
                 await move_miku_smooth(step)
@@ -351,7 +344,11 @@ async def main_app(page: ft.Page, debug: bool = False):
                 await move_miku_smooth(-step)
 
     async def on_event(e: ft.WindowEvent) -> None:
+        if exit_app:
+            return
         async def window_interactions(e: ft.WindowEvent):
+            delay: float = 2
+            
             if e.type == ft.WindowEventType.MOVED:
                 # user moved window; update baseline and resume idle
                 miku.set_pan_start(False)
@@ -360,24 +357,21 @@ async def main_app(page: ft.Page, debug: bool = False):
                 nonlocal idle_base_top
                 idle_base_top = page.window.top
                 
-                start_idle_bobbing()
-                restart_loop_after_delay(miku_chat(msg="╰(￣ω￣ｏ)", emote=Miku.NEUTRAL))
+                delay = await miku_chat(msg="╰(￣ω￣ｏ)", emote=Miku.HAPPY)
+                # start_idle_bobbing()
+                restart_loop_after_delay(delay)
                 
             elif e.type == ft.WindowEventType.BLUR:
-                delay: float = 2
-                
                 if chance(50):
-                    delay = miku_chat(msg="Are you just going to leave me here? o(≧口≦)o", emote=Miku.AMGRY)
+                    delay = await miku_chat(msg="Are you just going to leave me here? o(≧口≦)o", emote=Miku.AMGRY)
                 else:
                     miku.set_state(Miku.AMGRY)
                     
                 await to_front_with_delay()
                 restart_loop_after_delay(delay)
                 
-            elif e.type == ft.WindowEventType.FOCUS:
-                delay: float = 2
-                delay = miku_chat(msg="Hi! q(≧▽≦q)", emote=Miku.JOY)
-                
+            elif e.type == ft.WindowEventType.FOCUS and not is_miku_chatting:
+                delay = await miku_chat(msg="Hi! q(≧▽≦q)", emote=Miku.JOY)
                 restart_loop_after_delay(delay)
         
         if e.type == ft.WindowEventType.CLOSE:
@@ -388,44 +382,45 @@ async def main_app(page: ft.Page, debug: bool = False):
 
         check_and_adjust_bounds(page)
 
-    def on_drag_start(_) -> None:
+    async def on_drag_start(_) -> None:
         nonlocal exit_app
+        if exit_app:
+            return
         exit_app = False
-        
         miku.set_pan_start(True)
         
         if not open_menu:
-            delay = miku_chat(*rnd_miku_chat([
+            await miku_chat(*rnd_miku_chat([
                 ("Where we going? o((>ω< ))o", Miku.ECSTATIC),
                 ("Weeeee \\(≧▽≦)/", Miku.ECSTATIC),
                 ("P-please be gentle... (*/ω＼*)", Miku.PONDER),
                 ("You can place me in any monitor space! ヾ(•ω•`)o", Miku.GLASSES),
             ]), duration=0)
-            restart_loop_after_delay(delay)
 
     def on_enter(_) -> None: # User hovers over Miku
-        if (
-            not (speech_bubble and speech_bubble in speech_column.controls)
-            and not open_menu
+        if not (
+            open_menu or is_miku_chatting
+            or miku.is_pan_start() or exit_app
         ):
             miku.set_state(Miku.READY)
 
     def on_exit(_) -> None: # Default state for Miku
-        if (
-            not miku.is_pan_start()
-            and not stop_event.is_set()
-            and not exit_app and not open_menu
+        if not (
+            miku.is_pan_start() or stop_event.is_set()
+            or exit_app or open_menu or is_miku_chatting
         ):
             miku.set_state(Miku.NEUTRAL)
     
     async def on_tap_down(e: ft.TapEvent):
         nonlocal interaction_increment, interaction_timer, exit_app
+        if exit_app:
+            return
         delay: float = 2
         local_position: ft.Offset = e.local_position
         stop_movement_loop()
         exit_app = False
         
-        if not open_menu:
+        if not open_menu and not miku.is_pan_start():
             if is_within_radius(center=ft.Offset(x=141.0, y=210.0), point=local_position, radius=40):
                 # print(interaction_increment)
                 if not interaction_increment >= 5:
@@ -434,7 +429,7 @@ async def main_app(page: ft.Page, debug: bool = False):
                     
                     interaction_timer.start()
                     
-                    delay = miku_chat(msg="W-what are you doing?! ヽ（≧□≦）ノ", emote=Miku.SHOCK)
+                    delay = await miku_chat(msg="W-what are you doing?! ヽ（≧□≦）ノ", emote=Miku.SHOCK)
                     interaction_increment += 1
                     
                     if await interaction_timer.expired.wait():
@@ -442,13 +437,13 @@ async def main_app(page: ft.Page, debug: bool = False):
                         
                 else:
                     await interaction_timer.expired.wait()
-                    delay = miku_chat(msg="Grr, I've had enough! (* ￣︿￣)", emote=Miku.AMGRY, duration=0)
+                    delay = await miku_chat(msg="Grr, I've had enough! (* ￣︿￣)", emote=Miku.AMGRY, duration=0)
                     await asyncio.sleep(delay)
                     await exit_miku(chat=False)
                     return
                 
             elif is_within_radius(center=ft.Offset(x=121.0, y=135.0), point=local_position, radius=50):
-                delay = miku_chat(*rnd_miku_chat([
+                delay = await miku_chat(*rnd_miku_chat([
                     ("I-I do like h-headpats (≧﹏ ≦)", Miku.PONDER),
                     ("Hehehe~ (p≧w≦q)", Miku.ECSTATIC),
                     ("Headpats? Yippee q(≧▽≦q)", Miku.ECSTATIC),
@@ -456,15 +451,17 @@ async def main_app(page: ft.Page, debug: bool = False):
                 ]))
                 
             else:
-                delay = miku_chat()
+                delay = await miku_chat()
             restart_loop_after_delay(delay)
         else:
-            miku_chat(msg="Welcome to the menu! What do you want to do? o(*￣︶￣*)o", emote=Miku.HAPPY)
+            await miku_chat(msg="Welcome to the menu! What do you want to do? o(*￣︶￣*)o", emote=Miku.HAPPY)
         
     
     # TODO: Finish implementing a menu
     async def on_double_tap(_) -> None:
         nonlocal open_menu
+        if exit_app:
+            return
         height_increase = 0
         width_increase = 400
         
@@ -487,21 +484,27 @@ async def main_app(page: ft.Page, debug: bool = False):
             page.window.width -= width_increase
             page.window.top += height_increase
             page.update()
-            restart_loop_after_delay(miku_chat())
+            restart_loop_after_delay(await miku_chat())
         
         open_menu = not open_menu
 
     async def on_secondary_tap(_) -> None: # When user right-clicks (or secondary) Miku
-        nonlocal exit_timer, exit_app
+        nonlocal exit_timer, exit_app, disable, form
         delay: float = 2
         
+        if disable:
+            form.disabled = disable
+            form.update()
+            return
         if exit_app:
-            exit_timer.cancel()
+            disable = True
+            if exit_timer:
+                exit_timer.cancel()
             await exit_miku()
             return
             
         exit_app = True
-        delay = miku_chat(
+        delay = await miku_chat(
             msg="Right-click me again if you want me to leave... ~(>_<。)\\", 
             emote=Miku.PONDER)
         
@@ -534,40 +537,56 @@ async def main_app(page: ft.Page, debug: bool = False):
         page.window.prevent_close = False
         page.window.update()
         await asyncio.sleep(0.1)
-        await page.window.close()
+        try:
+            await page.window.close()
+        except:
+            print("There was an error closing the app... Anyways...")
+            pass
     
     async def exit_miku(chat: bool = True) -> None:
-        exit_animation_duration_ms = 1000
+        delay: float = 1
+        
+        if open_menu:
+            menu_column.controls.clear()
+            page.window.width -= 400
+            page.update()
         
         if chat:
-            miku_chat(*rnd_miku_chat([
+            delay = await miku_chat(*rnd_miku_chat([
                 ("\'Til next time! ヽ（≧□≦）ノ", Miku.HAPPY),
                 ("Don't forget about me! (≧﹏ ≦)", Miku.AMGRY),
                 ("I'm going to miss you... 〒▽〒", Miku.PONDER),
                 ("Don't forget to review!\nヾ(≧▽≦*)o", Miku.ECSTATIC),
-            ]), duration=0)
+            ]))
             
         stop_movement_loop()
         debug_msg("Bye bye...", handler="Miku", debug=debug)
-
-        miku_img.animate_rotation = ft.Animation(exit_animation_duration_ms, ft.AnimationCurve.DECELERATE)
-        miku_img.animate_opacity = ft.Animation(exit_animation_duration_ms, ft.AnimationCurve.EASE_IN_OUT)
+        
+        delay_in_ms = int(delay * 1000)
+        print(f"Closing up after {delay_in_ms}ms ({delay}s)...")
+        miku_img.animate_rotation = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT_CUBIC)
+        miku_img.animate_opacity = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT)
+        miku_img.animate_scale = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT)
         miku_img.update()
         await asyncio.sleep(0.1)
-        
         miku_img.rotate = ft.Rotate(math.pi * 2)
-        miku_img.opacity = 0.0
+        miku_img.opacity = 0
+        miku_img.scale = 0
         miku_img.update()
         
         stop_idle_bobbing()
-        await asyncio.sleep(exit_animation_duration_ms / 1000)
+        await asyncio.sleep(delay)
         await cleanup_then_exit()
-    
+        
     # -------- Setup Miku --------
     miku = DynamicMiku(Miku.NEUTRAL, debug=False)
     miku_img = miku.get_image()
-    miku_img.animate_rotation = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
+    miku_img.animate_rotation = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    miku_img.animate_scale = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    miku_img.animate_opacity = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
     miku_img.rotate = 0
+    miku_img.scale = 0
+    miku_img.opacity = 0
     
     menu_column = ft.Column(
         horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True,
@@ -589,6 +608,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     )
     
     speech_column = ft.Column(
+        controls=[speech_bubble],
         horizontal_alignment=ft.CrossAxisAlignment.START,
         alignment=ft.MainAxisAlignment.START, expand=False
     )
@@ -602,7 +622,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     miku_container = ft.Container(
         content=miku_stack, expand=True, alignment=ft.Alignment.CENTER
     )
-
+    
     miku_gs = ft.GestureDetector(
         content=miku_container,
         mouse_cursor=ft.MouseCursor.GRAB,
@@ -623,11 +643,23 @@ async def main_app(page: ft.Page, debug: bool = False):
     page.on_close = on_close
     page.window.on_event = on_event
     page.add(form)
-
+    
     check_and_adjust_bounds(page)
     
+    # Opening Animation
+    await asyncio.sleep(0.1)
+    miku_img.scale = 1
+    miku_img.opacity = 1
+    miku_img.rotate = ft.Rotate(math.pi * 2)
+    page.update()
+    await asyncio.sleep(1)
+    miku_img.animate_scale = None
+    miku_img.animate_rotation = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
+    miku_img.rotate = 0
+    page.update()
+    
     # Greetings
-    await asyncio.sleep(miku_chat(*rnd_miku_chat([
+    await asyncio.sleep(await miku_chat(*rnd_miku_chat([
         (f"Hello there {get_full_username()}! (｡･∀･)ﾉﾞ", Miku.HAPPY),
         ("Hello, I'm Hatsune Miku! ヾ(•ω•`)o", Miku.HAPPY),
     ])))
