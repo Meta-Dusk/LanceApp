@@ -3,7 +3,8 @@ import flet as ft
 from screeninfo import Monitor
 from typing import List
 from styles import transparent_window
-from utilities import get_all_monitors, debug_msg
+from utilities.monitor import get_all_monitors
+from utilities.debug import debug_msg
 
 
 def set_win_pos_bc(monitors: List[Monitor], page: ft.Page):

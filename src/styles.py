@@ -16,6 +16,7 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.padding = 0
     page.fonts = {font: get_font_path(font.value) for font in FontStyles}
     page.decoration = ft.BoxDecoration(border_radius=10, border=ft.Border.all(2, ft.Colors.PRIMARY)) if debug else None
+    page.theme_mode = ft.ThemeMode.DARK
     
     page.window.bgcolor = ft.Colors.TRANSPARENT
     page.window.title_bar_hidden = True
@@ -28,6 +29,7 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.window.width = width
     page.window.height = height
     page.window.alignment = ft.Alignment.BOTTOM_CENTER
+    page.window.prevent_close = True
     
     # page.update()
     # page.appbar = ft.AppBar(

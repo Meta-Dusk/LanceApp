@@ -2,17 +2,20 @@ import flet as ft
 import random
 import asyncio
 import math
+import multiprocessing
 
 from typing import Optional, Tuple
 from components import default_speech_bubble, default_menu
 from images import DynamicMiku, Miku
-from utilities import (
-    check_and_adjust_bounds, random_line, speech_lines, debug_msg, cancel_task,
-    await_task_completion, is_within_radius, chance, get_full_username, rnd_miku_chat,
-    ResettableTimer
-)
+from utilities.data import speech_lines, random_line
+from utilities.timers import ResettableTimer
+from utilities.tasks import cancel_task, await_task_completion
+from utilities.debug import get_full_username, debug_msg
+from utilities.helpers import rnd_miku_chat
+from utilities.monitor import check_and_adjust_bounds
+from utilities.math import chance, is_within_radius
 
-
+# TODO: If possible, refactor everything related to Miku into a class for modularity.
 async def main_app(page: ft.Page, debug: bool = False):
     # -------- Setup --------
     # Task Flags for Loops
@@ -316,7 +319,7 @@ async def main_app(page: ft.Page, debug: bool = False):
                 await move_miku_smooth(-step)
 
     async def on_event(e: ft.WindowEvent) -> None:
-        if not open_menu:
+        async def window_interactions(e: ft.WindowEvent):
             if e.type == ft.WindowEventType.MOVED:
                 # user moved window; update baseline and resume idle
                 miku.set_pan_start(False)
@@ -344,13 +347,19 @@ async def main_app(page: ft.Page, debug: bool = False):
                 delay = miku_chat(msg="Hi! q(≧▽≦q)", emote=Miku.JOY)
                 
                 restart_loop_after_delay(delay)
-                
-            elif e.type == ft.WindowEventType.CLOSE:
-                asyncio.create_task(on_close())
+        
+        if e.type == ft.WindowEventType.CLOSE:
+            await exit_miku()
+            
+        if not open_menu:
+            await window_interactions(e)
 
         check_and_adjust_bounds(page)
 
     def on_drag_start(_) -> None:
+        nonlocal exit_app
+        exit_app = False
+        
         miku.set_pan_start(True)
         
         if not open_menu:
@@ -372,7 +381,6 @@ async def main_app(page: ft.Page, debug: bool = False):
     def on_exit(_) -> None: # Default state for Miku
         if (
             not miku.is_pan_start()
-            and not miku.is_long_pressed()
             and not stop_event.is_set()
             and not exit_app and not open_menu
         ):
@@ -422,30 +430,30 @@ async def main_app(page: ft.Page, debug: bool = False):
             miku_chat(msg="Welcome to the menu! What do you want to do? o(*￣︶￣*)o", emote=Miku.HAPPY)
         
     
-    #TODO: Implement a sub-menu for Miku
+    # TODO: Finish implementing a menu
     async def on_double_tap(_) -> None:
         nonlocal open_menu
+        height_increase = 0
+        width_increase = 400
+        
         print(f"{"Opening" if not open_menu else "Closing"} the menu!")
-        menu = default_menu("Test Menu")
+        menu = default_menu("o(*≧▽≦)ツ┏━┓ What to do?")
         
         if not open_menu:
             stop_idle_bobbing()
             stop_movement_loop()
-            page.window.height += 40
-            page.window.width += 400
-            page.window.top -= 40
-            # page.window.left += 400
+            page.window.height += height_increase
+            page.window.width += width_increase
+            page.window.top -= height_increase
             menu_column.controls.append(menu)
             page.update()
             
         else:
-            if menu in menu_column.controls:
-                menu_column.controls.remove(menu)
+            menu_column.controls.clear()
             start_idle_bobbing()
-            page.window.height -= 40
-            page.window.width -= 400
-            page.window.top += 40
-            # page.window.left -= 400
+            page.window.height -= height_increase
+            page.window.width -= width_increase
+            page.window.top += height_increase
             page.update()
             restart_loop_after_delay(miku_chat())
         
@@ -475,26 +483,21 @@ async def main_app(page: ft.Page, debug: bool = False):
         
         await exit_timer.expired.wait()
         exit_app = False
-
-    def on_long_press_start(e: ft.LongPressStartEvent) -> None:
-        delay = miku_chat(
-            msg="The patch notes says, that there will be more Miku interactions soon! ( •̀ ω •́ )✧",
-            emote=Miku.READING, duration=0)
-        
-        miku.set_long_pressed(True)
-        restart_loop_after_delay(delay)
-
-    def on_long_press_end(e: ft.LongPressEndEvent) -> None:
-        miku.set_long_pressed(False)
-        restart_loop_after_delay(miku_chat())
+    
+    async def on_close(_):
+        debug_msg("Window has been closed manually!", debug=debug)
+        await exit_miku()
     
     # -------- Events --------
-    async def on_close() -> None:
+    async def cleanup_then_exit() -> None:
         debug_msg("Window closing... Cleaning up tasks.", debug=debug)
 
         for task in [movement_task, restart_timer, speech_timer, idle_task]:
             await await_task_completion(task)
-
+        
+        page.window.prevent_close = False
+        page.window.update()
+        await asyncio.sleep(0.1)
         await page.window.close()
     
     async def exit_miku(chat: bool = True) -> None:
@@ -505,23 +508,23 @@ async def main_app(page: ft.Page, debug: bool = False):
                 ("\'Til next time! ヽ（≧□≦）ノ", Miku.HAPPY),
                 ("Don't forget about me! (≧﹏ ≦)", Miku.AMGRY),
                 ("I'm going to miss you... 〒▽〒", Miku.PONDER),
-                ("Don't forget to review! ヾ(≧▽≦*)o", Miku.ECSTATIC),
+                ("Don't forget to review!\nヾ(≧▽≦*)o", Miku.ECSTATIC),
             ]), duration=0)
             
         stop_movement_loop()
         debug_msg("Bye bye...", handler="Miku", debug=debug)
 
-        miku_img.animate_scale = ft.Animation(exit_animation_duration_ms, ft.AnimationCurve.EASE_IN_OUT)
-        miku_img.animate_rotation = ft.Animation(exit_animation_duration_ms, ft.AnimationCurve.EASE_IN_OUT)
+        miku_img.animate_rotation = ft.Animation(exit_animation_duration_ms, ft.AnimationCurve.DECELERATE)
+        miku_img.animate_opacity = ft.Animation(exit_animation_duration_ms, ft.AnimationCurve.EASE_IN_OUT)
         miku_img.update()
         await asyncio.sleep(0.1)
         
         miku_img.rotate = ft.Rotate(math.pi * 2)
-        miku_img.scale = 0
+        miku_img.opacity = 0.0
         miku_img.update()
 
         await asyncio.sleep(exit_animation_duration_ms / 1000)
-        await on_close()
+        await cleanup_then_exit()
     
     # -------- Setup Miku --------
     miku = DynamicMiku(Miku.NEUTRAL, debug=False)
@@ -570,8 +573,6 @@ async def main_app(page: ft.Page, debug: bool = False):
         on_enter=on_enter,
         on_exit=on_exit,
         on_tap_down=on_tap_down,
-        on_long_press_start=on_long_press_start,
-        on_long_press_end=on_long_press_end,
         on_secondary_tap=on_secondary_tap,
         expand=True
     )
@@ -582,6 +583,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     )
     
     page.on_keyboard_event = on_keyboard_event
+    page.on_close = on_close
     page.window.on_event = on_event
     page.add(form)
 
