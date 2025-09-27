@@ -3,6 +3,7 @@ import flet as ft
 import screeninfo
 
 from typing import Optional
+from utilities.debug import debug_msg
 
 
 def get_all_monitors():
@@ -47,14 +48,19 @@ def clamp_to_monitor(m: screeninfo.Monitor, left: float, top: float, width: floa
     clamped_top = max(m.y, min(top, max_top))
     return int(clamped_left), int(clamped_top)
 
-def check_and_adjust_bounds(page: ft.Page):
+def check_and_adjust_bounds(page: ft.Page, debug: bool = False) -> bool:
+    """
+    Automatically adjusts window within boundaries of the monitor it has been placed in.
+    
+    Returns:
+        bool: Returns `True` if there is a valid monitor the window is in.
+    """
     window: ft.Window = page.window
     
-    m = get_monitor_for_window(
-        window.left, window.top, window.width, window.height
-    )
+    m = get_monitor_for_window(window.left, window.top, window.width, window.height)
     if not m:
-        return
+        debug_msg("DANGER! NO MONITOR!", debug=debug)
+        return False
 
     clamped_left, clamped_top = clamp_to_monitor(
         m, window.left, window.top, window.width, window.height
@@ -62,4 +68,6 @@ def check_and_adjust_bounds(page: ft.Page):
     if clamped_left != window.left or clamped_top != window.top:
         window.left, window.top = clamped_left, clamped_top
         window.update()
+    
+    return True
         

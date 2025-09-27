@@ -2,9 +2,10 @@ import flet as ft
 import random
 import asyncio
 import math
-import multiprocessing
 
+from desktop_notifier import DesktopNotifier, Urgency
 from typing import Optional, Tuple
+from setup import set_win_pos_bc
 from components import default_speech_bubble, default_menu
 from images import DynamicMiku, Miku
 from utilities.data import speech_lines, random_line
@@ -12,7 +13,7 @@ from utilities.timers import ResettableTimer
 from utilities.tasks import cancel_task, await_task_completion
 from utilities.debug import get_full_username, debug_msg
 from utilities.helpers import rnd_miku_chat
-from utilities.monitor import check_and_adjust_bounds
+from utilities.monitor import check_and_adjust_bounds, get_all_monitors
 from utilities.math import chance, is_within_radius
 
 # TODO: If possible, refactor everything related to Miku into a class for modularity.
@@ -35,12 +36,14 @@ async def main_app(page: ft.Page, debug: bool = False):
     show_idle_logs: bool = False
     exit_app: bool = False
     open_menu: bool = False
+    allow_void_traversal: bool = False
     
     # Movement
     miku_mv_freq_ms: Tuple[int, int] = (1000, 1500)  # Frequency of randomized Miku movement
     miku_mv_step: Tuple[int, int] = (-300, 300)      # Range of randomized Miku movement
     miku_rt_mod: float = 0.3                         # Rotation modifier for Miku flip
     miku_flip_chance: int = 5                        # Chance of Miku flip out of 100%
+    miku_chat_chance: int = 20                       # Chance for Miku to randomly chat out of 100%
     fps: float = 60.0                                # For smooth movement animation
     
     # Idle Animation
@@ -191,10 +194,39 @@ async def main_app(page: ft.Page, debug: bool = False):
         start_idle_bobbing()
         await to_front_with_delay()
         
-        check_and_adjust_bounds(page)
-        
-        if chance(10):
-            miku_chat()
+        is_in_bounds = check_and_adjust_bounds(page, debug)
+        if not is_in_bounds:
+            debug_msg("Attempting to restore position...", debug=debug)
+            if not allow_void_traversal:
+                if step > 0:
+                    page.window.left += step
+                else:
+                    page.window.left -= step
+                page.window.update()
+            else:
+                debug_msg("WARNING! Miku can move past monitor boundaries.", debug=debug)
+                def on_clicked():
+                    nonlocal target_left
+                    
+                    stop_movement_loop()
+                    set_win_pos_bc(get_all_monitors(), page)
+                    page.window.update()
+                    target_left = page.window.left
+                    restart_loop_after_delay(1)
+                
+                notifier = DesktopNotifier(app_name="Hatsune Miku")
+                await notifier.send(
+                    title="Help Me!",
+                    message="I've somehow ended up outside of your monitor... I'm in the void! （；´д｀）ゞ",
+                    urgency=Urgency.Critical,
+                    on_clicked=on_clicked
+                )
+                
+            miku_chat("W-woah... So that's what the void looks like (⊙_⊙;)", Miku.SHOCK)
+            
+        else:
+            if chance(miku_chat_chance):
+                miku_chat()
     
     # ---- Idle Bobbing (Independent Lifecycle) ----    
     async def idle_bobbing_loop() -> None:
@@ -490,8 +522,12 @@ async def main_app(page: ft.Page, debug: bool = False):
     
     # -------- Events --------
     async def cleanup_then_exit() -> None:
+        nonlocal interaction_timer, exit_timer
+        
         debug_msg("Window closing... Cleaning up tasks.", debug=debug)
-
+        
+        interaction_timer = None
+        exit_timer = None
         for task in [movement_task, restart_timer, speech_timer, idle_task]:
             await await_task_completion(task)
         
@@ -522,7 +558,8 @@ async def main_app(page: ft.Page, debug: bool = False):
         miku_img.rotate = ft.Rotate(math.pi * 2)
         miku_img.opacity = 0.0
         miku_img.update()
-
+        
+        stop_idle_bobbing()
         await asyncio.sleep(exit_animation_duration_ms / 1000)
         await cleanup_then_exit()
     

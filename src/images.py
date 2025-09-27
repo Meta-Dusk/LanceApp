@@ -150,6 +150,8 @@ def generate_image(image_data: ImageData) -> ft.Image:
 Run test for images.py with:
 py -m src.images
 """
+from desktop_notifier import DesktopNotifier, Notification, Urgency
+
 async def before_test(page: ft.Page):
     page.bgcolor = ft.Colors.TRANSPARENT
     page.padding = 0
@@ -166,6 +168,17 @@ async def before_test(page: ft.Page):
     page.update()
 
 async def test(page: ft.Page):
+    notifier = DesktopNotifier(app_name="Desktop Assistant")
+    
+    note = Notification(
+        title="Miku",
+        message="I moved to the right!",
+        urgency=Urgency.Normal
+    )
+    
+    async def send_notification(note: Notification):
+        await notifier.send_notification(note)
+    
     await before_test(page)
     
     async def on_keyboard_event(e: ft.KeyboardEvent):
@@ -177,6 +190,7 @@ async def test(page: ft.Page):
             page.window.width += step
         if key == "D":
             page.window.left += step
+            page.run_task(send_notification, note)
         if key == "W":
             page.window.top -= step
         if key == "S":
