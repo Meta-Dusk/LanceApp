@@ -405,18 +405,16 @@ async def main_app(page: ft.Page, debug: bool = False):
 
     async def on_drag_start(_) -> None:
         nonlocal exit_app
-        if exit_app:
-            return
         exit_app = False
         miku.set_pan_start(True)
-        
-        if not open_menu:
-            await miku_chat(*rnd_miku_chat([
-                ("Where we going? o((>ω< ))o", Miku.ECSTATIC),
-                ("Weeeee \\(≧▽≦)/", Miku.ECSTATIC),
-                ("P-please be gentle... (*/ω＼*)", Miku.PONDER),
-                ("You can place me in any monitor space! ヾ(•ω•`)o", Miku.GLASSES),
-            ]), duration=0)
+        if exit_app or open_menu:
+            return
+        await miku_chat(*rnd_miku_chat([
+            ("Where we going? o((>ω< ))o", Miku.ECSTATIC),
+            ("Weeeee \\(≧▽≦)/", Miku.ECSTATIC),
+            ("P-please be gentle... (*/ω＼*)", Miku.PONDER),
+            ("You can place me in any monitor space! ヾ(•ω•`)o", Miku.GLASSES),
+        ]), duration=0)
 
     def on_enter(_) -> None: # User hovers over Miku
         if not (
@@ -434,48 +432,48 @@ async def main_app(page: ft.Page, debug: bool = False):
     
     async def on_tap_down(e: ft.TapEvent):
         nonlocal interaction_increment, interaction_timer, exit_app
-        if exit_app:
+        if exit_app or miku.is_pan_start():
             return
         delay: float = 2
         local_position: ft.Offset = e.local_position
         stop_movement_loop()
         exit_app = False
         
-        if not open_menu and not miku.is_pan_start():
-            if is_within_radius(center=ft.Offset(x=141.0, y=210.0), point=local_position, radius=40):
-                # print(interaction_increment)
-                if not interaction_increment >= 5:
-                    if interaction_timer is None:
-                        interaction_timer = ResettableTimer(delay)
-                    
-                    interaction_timer.start()
-                    
-                    delay = await miku_chat(msg="W-what are you doing?! ヽ（≧□≦）ノ", emote=Miku.SHOCK)
-                    interaction_increment += 1
-                    
-                    if await interaction_timer.expired.wait():
-                        interaction_increment = 0
-                        
-                else:
-                    await interaction_timer.expired.wait()
-                    delay = await miku_chat(msg="Grr, I've had enough! (* ￣︿￣)", emote=Miku.AMGRY, duration=0)
-                    await asyncio.sleep(delay)
-                    await exit_miku(chat=False)
-                    return
-                
-            elif is_within_radius(center=ft.Offset(x=121.0, y=135.0), point=local_position, radius=50):
-                delay = await miku_chat(*rnd_miku_chat([
-                    ("I-I do like h-headpats (≧﹏ ≦)", Miku.PONDER),
-                    ("Hehehe~ (p≧w≦q)", Miku.ECSTATIC),
-                    ("Headpats? Yippee q(≧▽≦q)", Miku.ECSTATIC),
-                    ("I-I don't mind h-headpats\n(≧﹏ ≦)", Miku.PONDER),
-                ]))
-                
-            else:
-                delay = await miku_chat()
-            restart_loop_after_delay(delay)
-        else:
+        if open_menu:
             await miku_chat(msg="Welcome to the menu! What do you want to do? o(*￣︶￣*)o", emote=Miku.HAPPY)
+            return
+        if is_within_radius(center=ft.Offset(x=141.0, y=210.0), point=local_position, radius=40):
+            # print(interaction_increment)
+            if not interaction_increment >= 5:
+                if interaction_timer is None:
+                    interaction_timer = ResettableTimer(delay)
+                
+                interaction_timer.start()
+                
+                delay = await miku_chat(msg="W-what are you doing?! ヽ（≧□≦）ノ", emote=Miku.SHOCK)
+                interaction_increment += 1
+                
+                if await interaction_timer.expired.wait():
+                    interaction_increment = 0
+                    
+            else:
+                await interaction_timer.expired.wait()
+                delay = await miku_chat(msg="Grr, I've had enough! (* ￣︿￣)", emote=Miku.AMGRY, duration=0)
+                await asyncio.sleep(delay)
+                await exit_miku(chat=False)
+                return
+            
+        elif is_within_radius(center=ft.Offset(x=121.0, y=135.0), point=local_position, radius=50):
+            delay = await miku_chat(*rnd_miku_chat([
+                ("I-I do like h-headpats (≧﹏ ≦)", Miku.PONDER),
+                ("Hehehe~ (p≧w≦q)", Miku.ECSTATIC),
+                ("Headpats? Yippee q(≧▽≦q)", Miku.ECSTATIC),
+                ("I-I don't mind h-headpats\n(≧﹏ ≦)", Miku.PONDER),
+            ]))
+            
+        else:
+            delay = await miku_chat()
+        restart_loop_after_delay(delay)
         
     
     # TODO: Finish implementing a menu
