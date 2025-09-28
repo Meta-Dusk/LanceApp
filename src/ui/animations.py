@@ -21,12 +21,12 @@ async def opening_animation(page: ft.Page, miku_img: ft.Image) -> None:
     miku_img.scale = 1
     miku_img.opacity = 1
     miku_img.rotate = ft.Rotate(math.pi * 2)
-    page.update()
+    miku_img.update()
     await asyncio.sleep(1)
     miku_img.animate_scale = None
     miku_img.animate_rotation = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
     miku_img.rotate = 0
-    page.update()
+    miku_img.update()
     
 async def exit_animation(miku_img: ft.Image, delay: float) -> None:
     """The application exit animation sequence for Miku."""

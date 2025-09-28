@@ -5,16 +5,16 @@ from typing import Optional, Tuple
 from setup import set_win_pos_bc, before_main_app
 from chats import (
     CHAT_GREETINGS, EXIT_APP_MSGS, WHEN_HEADPAT_MSGS, WHEN_DRAGGED_MSGS, WHEN_IN_VOID_MSGS,
-    WHEN_FED_UP_MSGS, WHEN_FLUSTERED_MSGS)
+    WHEN_FED_UP_MSGS, WHEN_FLUSTERED_MSGS, after_dragged_msgs)
 from ui.components import default_speech_bubble, default_menu
 from ui.images import DynamicMiku, Miku
 from ui.animations import opening_animation, set_initial_animations, exit_animation
-from utilities.data import SPEECH_LINES, random_line, get_day_period
+from utilities.data import SPEECH_LINES, random_line
 from utilities.timers import ResettableTimer, DeltaTimer
 from utilities.tasks import cancel_task, await_task_completion, is_task_done
-from utilities.debug import get_full_username, debug_msg
+from utilities.debug import debug_msg
 from utilities.helpers import rnd_miku_chat
-from utilities.monitor import check_and_adjust_bounds, get_all_monitors
+from utilities.monitor import check_and_adjust_bounds, get_all_monitors, get_monitor_for_window
 from utilities.math import chance, is_within_radius
 from utilities.notifications import preset_help_notif
 
@@ -41,13 +41,14 @@ async def main_app(page: ft.Page, debug: bool = False):
     
     ## -- Variables --
     # Debug Stuff
+    ALLOW_VOID_TRAVERSAL: bool = False
     ENABLE_MV_OVERRIDE: bool = False
     SHOW_MOVEMENT_LOGS: bool = False
     SHOW_IDLE_LOGS: bool = False
     SHOW_CHAT_LOGS: bool = False
+    SHOW_LOOP_LOGS: bool = False
     exit_app: bool = False
     open_menu: bool = False
-    ALLOW_VOID_TRAVERSAL: bool = False
     is_miku_chatting: bool = False
     disable: bool = False
     
@@ -66,7 +67,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     
     # Speech Values (in seconds)
     MSG_BASE_TIME: float = 2.0          # Minimum time to display
-    PER_CHAR_TIME: float = 0.005        # Tweak speed factor
+    PER_CHAR_TIME: float = 0.02         # Tweak speed factor
     
     # Timers for Stuff
     interaction_timer: ResettableTimer = None
@@ -77,11 +78,11 @@ async def main_app(page: ft.Page, debug: bool = False):
     # -------- Window Functions --------
     async def to_front_with_delay(delay: float = 1):
         """Sets the window to be `always_on_top` for a duration given by `delay`."""
-        debug_msg(f"Bringing Miku to the front for {delay}s", debug=False)
+        debug_msg(f"Bringing Miku to the front for {delay}s", debug=debug)
         page.window.always_on_top = True
         await asyncio.sleep(delay)
         page.window.always_on_top = False
-        debug_msg("Brought Miku to the front.", debug=False)
+        debug_msg("Brought Miku to the front.", debug=debug)
     
     # -------- Task Helpers --------
     def start_movement_loop() -> None:
@@ -108,21 +109,21 @@ async def main_app(page: ft.Page, debug: bool = False):
         """Restarts the movement loop after a `delay`. If `delay <= 0` then cancel, and `delay` is in seconds."""
         nonlocal restart_timer_task
         if cancel_task(restart_timer_task):
-            debug_msg(msg="Cancelled previous restart_timer_task", handler="delayed_restart", debug=debug)
+            debug_msg(msg="Cancelled previous restart_timer_task", handler="delayed_restart", debug=SHOW_LOOP_LOGS)
         stop_movement_loop()
         
         if delay <= 0:
-            debug_msg(f"Cancelling restart loop since delay={delay}", debug=debug)
+            debug_msg(f"Cancelling restart loop since delay={delay}", debug=SHOW_LOOP_LOGS)
             return
         
-        debug_msg(f"Waiting for {delay}s before restarting loop.", debug=debug)
+        debug_msg(f"Waiting for {delay}s before restarting loop.", debug=SHOW_LOOP_LOGS)
         
         async def delayed_restart():
             """Starts movement loop after `delay` and also resets Miku to her `Neutral` state."""
             await asyncio.sleep(delay)
             if miku.is_pan_start():
                 return
-            debug_msg(msg="Setting Miku to Neutral", handler="delayed_restart", debug=debug)
+            debug_msg(msg="Setting Miku to Neutral", handler="delayed_restart", debug=SHOW_LOOP_LOGS)
             miku.set_state(Miku.NEUTRAL)
             start_movement_loop()
         
@@ -371,9 +372,9 @@ async def main_app(page: ft.Page, debug: bool = False):
                 await start_smooth_movement(-step)
     
     async def window_interactions(e: ft.WindowEvent) -> None:
+        """Various window interactions with Miku."""
         delay: float = 2
-        
-        if e.type == ft.WindowEventType.MOVED:
+        if e.type == ft.WindowEventType.MOVED: # After drag
             # user moved window; update baseline and resume idle
             check_and_adjust_bounds(page, debug)
             miku.set_pan_start(False)
@@ -381,16 +382,13 @@ async def main_app(page: ft.Page, debug: bool = False):
             # IMPORTANT: update idle baseline to user's new position
             nonlocal idle_base_top
             idle_base_top = page.window.top
-            
-            delay = await miku_chat(msg="╰(￣ω￣ｏ)", emote=Miku.HAPPY)
-            # start_idle_bobbing()
+            delay = await miku_chat(*rnd_miku_chat(after_dragged_msgs(page)))
             
         elif e.type == ft.WindowEventType.BLUR:
             if chance(50):
                 delay = await miku_chat(msg="Are you just going to leave me here? o(≧口≦)o", emote=Miku.AMGRY)
             else:
                 miku.set_state(Miku.AMGRY)
-                
             await to_front_with_delay()
             
         elif e.type == ft.WindowEventType.FOCUS and not is_miku_chatting:
@@ -399,6 +397,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         restart_loop_after_delay(delay)
     
     async def on_event(e: ft.WindowEvent) -> None:
+        """Handles manual application exit logic."""
         if exit_app:
             return
         if e.type == ft.WindowEventType.CLOSE:
@@ -474,8 +473,8 @@ async def main_app(page: ft.Page, debug: bool = False):
         if exit_app:
             return
         print(f"{"Opening" if not open_menu else "Closing"} the menu!")
-        menu = default_menu("Action Menu. Select any option from below to try!")
-        miku_chat(msg="Welcome to the menu! What do you want to do? o(*￣︶￣*)o", emote=Miku.HAPPY)
+        menu = default_menu("-- Action Menu --\nSelect any option from below to try!")
+        await miku_chat(msg="Welcome to the menu! What do you want to do? o(*￣︶￣*)o", emote=Miku.HAPPY)
         if not open_menu:
             stop_idle_bobbing()
             stop_movement_loop()
@@ -622,9 +621,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     
     check_and_adjust_bounds(page)
     await opening_animation(page, miku_img)
-    await asyncio.sleep(await miku_chat(*rnd_miku_chat(CHAT_GREETINGS)))
-    start_movement_loop()
-    start_idle_bobbing()
+    restart_loop_after_delay(await miku_chat(*rnd_miku_chat(CHAT_GREETINGS)))
 
 
 if __name__ == "__main__":

@@ -1,6 +1,10 @@
+import flet as ft
+
 from ui.images import Miku
 from utilities.data import get_day_period
 from utilities.debug import get_full_username
+from utilities.helpers import rnd_miku_chat
+from utilities.monitor import get_monitor_for_window
 
 # TODO: Make a class for chatting, if possible
 
@@ -31,6 +35,22 @@ WHEN_DRAGGED_MSGS = [
     ("P-please be gentle... (*/ω＼*)", Miku.PONDER),
     ("You can place me in any monitor space! ヾ(•ω•`)o", Miku.GLASSES),
 ]
+
+AFTER_DRAGGED_MSGS = [
+    ("╰(￣ω￣ｏ)", Miku.HAPPY),
+]
+
+def after_dragged_msgs(page: ft.Page):
+    m = get_monitor_for_window(page=page)
+    status = "currently" if m.is_primary else "NOT"
+    add_list = [
+        (f"Hmm... My sources tell me that I'm {status} in your main monitor! "
+         f"And its name is\n{m.name}? ( *︾▽︾)", Miku.READING),
+        (f"The monitor name {m.name} sounds weird (°ー°〃)", Miku.PONDER),
+        (f"Your monitor is quite spacious... A {m.width} x {m.height} monitor is cool!\n( •̀ ω •́ )y", Miku.ECSTATIC),
+    ]
+    new_list = AFTER_DRAGGED_MSGS + add_list
+    return new_list
 
 WHEN_IN_VOID_MSGS = [
     ("W-woah... So that's what the void looks like (⊙_⊙;)", Miku.SHOCK),
