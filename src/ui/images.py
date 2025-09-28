@@ -87,7 +87,10 @@ class DynamicMiku:
         self.miku_data = miku_data
         self._image = self._generate_image(miku_data.value)
         self.state = miku_data.name
-
+    
+    # -----------------------------
+    # Internal Functions
+    # -----------------------------
     def _generate_image(self, miku_data):
         self._debug_msg("A miku has been made.")
         return generate_image(miku_data)
@@ -96,7 +99,9 @@ class DynamicMiku:
         if self.debug:
             print(f"[Miku] {msg}")
     
-    
+    # -----------------------------
+    # Main Usable Functions
+    # -----------------------------
     def print(self):
         for attr in self.__dict__.items():
             print(attr)

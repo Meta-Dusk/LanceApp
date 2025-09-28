@@ -1,5 +1,4 @@
 import flet as ft
-
 import screeninfo
 
 from typing import Optional

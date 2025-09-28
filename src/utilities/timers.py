@@ -1,5 +1,4 @@
-import asyncio
-import time
+import asyncio, time
 
 class ResettableTimer:
     def __init__(self, duration: float):

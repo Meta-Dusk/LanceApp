@@ -2,12 +2,13 @@ import flet as ft
 
 from screeninfo import Monitor
 from typing import List
-from styles import transparent_window
+from ui.styles import transparent_window
 from utilities.monitor import get_all_monitors
 from utilities.debug import debug_msg
 
 
 def set_win_pos_bc(monitors: List[Monitor], page: ft.Page):
+    """Sets the window's position to the primary monitor's bottom center."""
     if monitors:
         primary = monitors[0] # Gets the primary monitor
         window = page.window
@@ -19,6 +20,7 @@ def set_win_pos_bc(monitors: List[Monitor], page: ft.Page):
         window.top = primary.y + primary.height - window.height
 
 async def before_main_app(page: ft.Page, debug: bool = False):
+    """Serves as the setup function. Must be called before the `main`."""
     # -------- Before Main App --------
     transparent_window(page, height=260, debug=debug)
     
@@ -39,4 +41,4 @@ async def before_main_app(page: ft.Page, debug: bool = False):
         page.on_keyboard_event = on_keyboard_event
     
     page.window.on_event = on_window_event
-    page.update()
+    page.window.update()

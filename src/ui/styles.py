@@ -12,6 +12,7 @@ def get_font_path(font_style: str) -> str:
 
 
 def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False) -> None:
+    """Makes the window a formatted transparent view, perfect for Miku."""
     page.bgcolor = ft.Colors.TRANSPARENT
     page.padding = 0
     page.fonts = {font: get_font_path(font.value) for font in FontStyles}

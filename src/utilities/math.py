@@ -1,7 +1,5 @@
 import flet as ft
-
-import math
-import random
+import math, random
 
 from typing import Union, Tuple
 

@@ -1,9 +1,10 @@
 import flet as ft
 
-from styles import FontStyles
+from ui.styles import FontStyles
 
 
 def default_text(value: str, size: ft.Number = 14) -> ft.Text:
+    """Returns a pre-styled text component."""
     return ft.Text(
         value=value, size=size,
         font_family=FontStyles.BLRRPIX,

@@ -1,5 +1,4 @@
-import json
-import random
+import json, random
 
 from pathlib import Path
 
@@ -12,6 +11,7 @@ def load_lines(file_path: str) -> list[dict]:
         return json.load(f)  # returns a list of dicts
 
 def random_line(lines: list[dict]) -> dict:
+    """Chooses a random entry from the list of dicts."""
     return random.choice(lines)
 
-speech_lines = load_lines(LINES_PATH)
+SPEECH_LINES = load_lines(LINES_PATH)
