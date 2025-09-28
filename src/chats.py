@@ -3,7 +3,6 @@ import flet as ft
 from ui.images import Miku
 from utilities.data import get_day_period
 from utilities.debug import get_full_username
-from utilities.helpers import rnd_miku_chat
 from utilities.monitor import get_monitor_for_window
 
 # TODO: Make a class for chatting, if possible
@@ -40,7 +39,8 @@ AFTER_DRAGGED_MSGS = [
     ("╰(￣ω￣ｏ)", Miku.HAPPY),
 ]
 
-def after_dragged_msgs(page: ft.Page):
+def after_dragged_msgs(page: ft.Page) -> list[tuple[str, Miku]]:
+    """Returns a list of message arguments with new special messages."""
     m = get_monitor_for_window(page=page)
     status = "currently" if m.is_primary else "NOT"
     add_list = [
