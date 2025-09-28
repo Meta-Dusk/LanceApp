@@ -59,8 +59,7 @@ class MikuData(ImageData):
     error_content: ft.Control = field(default_factory=lambda: error_container("No Miku 😔"))
     data: Optional[dict] = field(default_factory=lambda: {
         "flipped": False,
-        "pan_start": False,
-        "long_pressed": False
+        "pan_start": False
     })
 
 
@@ -130,12 +129,6 @@ class DynamicMiku:
 
     def is_pan_start(self) -> bool:
         return self._image.data.get("pan_start", False)
-    
-    def set_long_pressed(self, active: bool) -> bool:
-        self._image.data["long_pressed"] = active
-    
-    def is_long_pressed(self) -> bool:
-        return self._image.data.get("long_pressed", False)
 
 
 def generate_image(image_data: ImageData) -> ft.Image:

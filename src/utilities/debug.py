@@ -6,6 +6,7 @@ def debug_msg(msg: str, handler: str = "DEBUG", debug: bool = False):
         print(f"[{handler}] {msg}")
         
 def get_full_username():
+    """(Only works in Windows) Returns the user currently logged in the pc."""
     GetUserNameEx = ctypes.windll.secur32.GetUserNameExW
     NameDisplay = 3  # NameDisplay gives full name
 

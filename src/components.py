@@ -22,12 +22,12 @@ def default_speech_bubble(msg: str) -> ft.Container:
         animate_opacity=ft.Animation(200, ft.AnimationCurve.EASE_IN_OUT)
     )
 
-def default_container(content: ft.Control) -> ft.Container:
+def default_container(content: ft.Control, expand: bool | int = True) -> ft.Container:
     """Returns a pre-styled container."""
     return ft.Container(
         content=content, padding=10, border_radius=10,
         border=ft.Border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE_400)),
-        bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE), expand=True,
+        bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE), expand=expand,
         alignment=ft.Alignment.CENTER
     )
 
@@ -60,7 +60,7 @@ def default_menu(title: str) -> ft.Container:
         buttons.update()
     
     title_text = default_text(value=title, size=20)
-    title_container = default_container(title_text)
+    title_container = default_container(content=title_text, expand=1)
     title_row = ft.Row(
         controls=[title_container], expand=True,
         alignment=ft.MainAxisAlignment.CENTER,
@@ -84,7 +84,7 @@ def default_menu(title: str) -> ft.Container:
         alignment=ft.MainAxisAlignment.CENTER,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
-    buttons_container = default_container(button_row)
+    buttons_container = default_container(content=button_row, expand=2)
     
     main_column = ft.Column(
         controls=[title_row, buttons_container], expand=True,
