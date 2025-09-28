@@ -51,7 +51,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     # Movement
     MIKU_MV_FREQ_MS: Tuple[int, int] = (2000, 3000)  # Frequency of randomized Miku movement
     MIKU_MV_STEP: Tuple[int, int] = (-300, 300)      # Range of randomized Miku movement
-    MIKU_RT_MOD: float = 0.3                         # Rotation modifier for Miku flip
+    MIKU_RT_MOD: float = 0.1                         # Rotation modifier for Miku flip
     MIKU_FLIP_CHANCE: int = 5                        # Chance of Miku flip out of 100%
     MIKU_CHAT_CHANCE: int = 20                       # Chance for Miku to randomly chat out of 100%
     FPS: float = 60.0                                # For smooth movement animation

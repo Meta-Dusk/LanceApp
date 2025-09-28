@@ -41,4 +41,4 @@ async def before_main_app(page: ft.Page, debug: bool = False):
         page.on_keyboard_event = on_keyboard_event
     
     page.window.on_event = on_window_event
-    page.window.update()
+    page.update()
