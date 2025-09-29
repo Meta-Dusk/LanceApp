@@ -42,9 +42,15 @@ def get_day_period(return_str: bool = True) -> TimePeriod | str:
         return str_or_enum(TimePeriod.EVENING)
 
 def get_date() -> str:
-    """Returns the current date in English."""
-    return datetime.now().strftime("%A. %B %d, %Y")
+    """
+    Returns the current date in English.
+    Example: \"Monday; September 29, 2025\"
+    """
+    return datetime.now().strftime("%A; %B %d, %Y")
 
 def get_time() -> str:
-    """Returns the current time in English."""
+    """
+    Returns the current time in English.
+    Example: \"10:32 PM\"
+    """
     return datetime.now().strftime("%I:%M %p")

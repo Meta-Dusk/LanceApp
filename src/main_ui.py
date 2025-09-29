@@ -11,7 +11,7 @@ from ui.images import DynamicMiku, Miku
 from ui.menus import DefaultMenu
 from ui.animations import (opening_animation, anim_setup_main, exit_animation, show_menu_animation,
                            exit_menu_animation)
-from utilities.data import SPEECH_LINES, random_line
+from utilities.data import SPEECH_LINES, random_line, get_date, get_time
 from utilities.timers import ResettableTimer, DeltaTimer
 from utilities.tasks import cancel_task, await_task_completion, is_task_done
 from utilities.debug import debug_msg
@@ -582,8 +582,13 @@ async def main_app(page: ft.Page, debug: bool = False):
     )
     
     menu = DefaultMenu("-- Action Menu --\nSelect any option from below to try!")
-    menu.add_button("Exit Miku", lambda _: asyncio.create_task(coro=exit_miku(), name="Exit Miku -> exit_miku()"))
-    menu.add_button("Make Miku Yap", lambda _: asyncio.create_task(coro=miku_chat(), name="Make Miku Yap -> miku_chat()"))
+    menu.add_button("Ask Miku to Exit the App", lambda e: asyncio.create_task(
+        coro=exit_miku(), name=f"{e.name} -> exit_miku()"))
+    menu.add_button("Talk With Miku", lambda e: asyncio.create_task(
+        coro=miku_chat(), name=f"{e.name} -> miku_chat()"))
+    menu.add_button("Ask Miku the Date and Time", lambda e: asyncio.create_task(
+        coro=miku_chat(f"Today is {get_date()}, and the time is {get_time()}! []~(￣▽￣)~*", Miku.READING),
+        name=f"{e.name} -> miku_chat()"))
     menu_ctrl = menu.build()
     menu_column = ft.Column(
         controls=[menu_ctrl], expand=True,
@@ -648,6 +653,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         page.decoration = None
         page.update()
     
+    page.window.visible = True
     check_and_adjust_bounds(page, SHOW_WINDOW_LOGS)
     debug_msg("...And Hatsune Miku enters the screen!", debug=debug)
     await opening_animation(miku_img)

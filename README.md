@@ -52,18 +52,17 @@ Open a menu. Refer to the [Controls](#controls) section.
 3. Randomized Messages
 4. Different Expressions
 5. Flips
-6. Some Animations
-7. Menus **< (Still in Development under Experimental)**
+6. Animations
+7. A Menu
 
 ## Planned Features
 
 1. SFX
 2. More Easter Eggs
-3. Proper Menus **< (In Development in Experimental)**
-4. Settings Menu
-5. More Custom Messages
-6. Minigames
-7. Make her an actual "Desktop Assistant" and not just a pet
+3. Extensive Menus **< (In Development in Experimental)**
+4. Settings Menu **< (In Development in Experimental)**
+5. Minigames
+6. Make her an actual "Desktop Assistant" and not just a pet
 
 ## Unintended Behaviors
 

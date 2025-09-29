@@ -8,7 +8,7 @@ from utilities.monitor import get_monitor_for_window
 # TODO: Make a class for chatting, if possible
 
 CHAT_GREETINGS = [
-    (f"Hello there {get_full_username()}! (｡･∀･)ﾉﾞ", Miku.HAPPY),
+    (f"Hello there {get_full_username()}!\n(｡･∀･)ﾉﾞ", Miku.HAPPY),
     ("Hello, I'm Hatsune Miku! ヾ(•ω•`)o", Miku.HAPPY),
     (f"Good {get_day_period(return_str=True).capitalize()}! Genki? ヾ(^▽^*)))", Miku.HAPPY),
     (f"Let's start the {get_day_period(return_str=True)} feeling energized! o(^▽^)o", Miku.JOY),
