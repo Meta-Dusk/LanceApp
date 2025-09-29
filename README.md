@@ -1,6 +1,6 @@
 # A Desktop Assistant App made especially for Marcus Lance
 
-> Current version: v0.4.0 (Not yet released)
+> Current version: v0.4.0
 
 **Happy Birthday, Marcus Lance!**
 
