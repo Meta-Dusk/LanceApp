@@ -654,6 +654,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         page.update()
     
     page.window.visible = True
+    page.update()
     check_and_adjust_bounds(page, SHOW_WINDOW_LOGS)
     debug_msg("...And Hatsune Miku enters the screen!", debug=debug)
     await opening_animation(miku_img)
