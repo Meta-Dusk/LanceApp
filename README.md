@@ -44,6 +44,7 @@ Open a menu. Refer to the [Controls](#controls) section.
 3. Miku suddenly stops her idle animation; try [Fix 2](#fix-2). *This issue occurs when clicking her registers as a drag event, but is immediately canceled, resulting in the events not registering correctly.*
 4. After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but nothing serious. *This issue is still under scrutiny.*
 5. Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds of the monitor. *This issue is still under scrutiny.*
+6. When launching the app, it sometimes just doesn't stop loading; try [Fix 1](#fix-1). *This issue is still under scrutiny.*
 
 ## Features
 
