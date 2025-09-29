@@ -9,32 +9,41 @@
 > This section will be removed once the menu feature has been implemented.
 > The controls being referred here are for interacting with Miku, or used directly on her.
 
-- Left-click: Default interaction.
-- Right-click: Placeholder interaction; will open a menu soon, but for now, it will only say how to exit.
-- Double-click (left-click): Exits the application.
-- Left-click and drag: Will move Miku around.
+### Left-click
+
+Default interaction. Click twice for a menu. Clicking then holding is a placeholder for now.
+
+### Right-click
+
+Click twice to exit.
+
+### Left-click + drag
+
+Will move Miku around.
 
 ## Known Issues and Fixes
 
 Please do report any issues found that are not solvable with the fixes provided below:
 
 ### Fix 1
-Relaunch the app.
+
+Relaunch the app. Refer to the [Controls](#controls) section.
 
 ### Fix 2
-Move Miku around your screen, then stop.
+
+Move Miku around your screen, then stop. Refer to the [Controls](#controls) section.
+
+### Fix 3
+
+Open a menu. Refer to the [Controls](#controls) section.
 
 ### The Known Issues
 
-1. When launching the app for the first time, there could be an issue with the window, where it will look stretched, and the speech bubble is clipped. Please refer to [Fix 1](#fix-1).
-2. A border around Miku appears during app launch; refer to [Fix 1](#fix-1).
-3. Miku suddenly stops her idle animation; refer to [Fix 2](#fix-2).
-4. Miku appears to be stretched and/or the speech bubble is clipped or stretched; refer to [Fix 1](#fix-1).
-5. After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but **no fix yet**.
-6. Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds, and **no fix yet**.
-
-> In conclusion, most issues that may arise, are solvable by either:
-> Relaunching the app, or dragging Miku around, then stopping.
+1. Miku, the window, or the speech bubble appears to be stretched, clipped, or stretched; try [Fix 3](#fix-3) first then [Fix 1](#fix-1) if it doesn't work. *This issue could be because of how `Flet` handles transparent windows.*
+2. A border around Miku appears during app launch; try [Fix 1](#fix-1). *This issue could also be because of how `Flet` handles transparent windows.*
+3. Miku suddenly stops her idle animation; try [Fix 2](#fix-2). *This issue occurs when clicking her registers as a drag event, but is immediately canceled, resulting in the events not registering correctly.*
+4. After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but nothing serious. *This issue is still under scrutiny.*
+5. Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds of the monitor. *This issue is still under scrutiny.*
 
 ## Features
 
@@ -43,18 +52,18 @@ Move Miku around your screen, then stop.
 3. Randomized Messages
 4. Different Expressions
 5. Flips
-6. Some Animations
+6. Animations
+7. A Menu
 
 ## Planned Features
 
 1. SFX
 2. More Easter Eggs
-3. Proper Menu
-4. Settings Menu
-5. More Custom Messages
-6. Minigames
-7. Make her an actual "Desktop Assistant" and not just a pet
+3. Extensive Menus **< (In Development in Experimental)**
+4. Settings Menu **< (In Development in Experimental)**
+5. Minigames
+6. Make her an actual "Desktop Assistant" and not just a pet
 
 ## Unintended Behaviors
 
-- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker, Mikus Galore (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)
+- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker... **Mikus Galore!** (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)

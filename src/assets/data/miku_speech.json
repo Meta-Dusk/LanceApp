@@ -1,7 +1,7 @@
 [
   {
     "text": "Hello, I'm Miku (●'◡'●)",
-    "emotion": "neutral"
+    "emotion": "happy"
   },
   {
     "text": "Do you like music? (✿◡‿◡)",
@@ -24,7 +24,7 @@
     "emotion": "glasses"
   },
   {
-    "text": "I've been waiting to talk to you... (*/ω＼*)",
+    "text": "I've been waiting to talk to you...\n(*/ω＼*)",
     "emotion": "ponder"
   },
   {
@@ -50,5 +50,41 @@
   {
     "text": "I suppose I'll just stick with you for a while longer (❁´◡`❁)",
     "emotion": "ponder"
+  },
+  {
+    "text": "Can you promise me that you won't ever forget about me?\n(。﹏。*)",
+    "emotion": "ponder"
+  },
+  {
+    "text": "I feel like that lately, Teto's been getting a lot more attention than me... ≧ ~ ≦",
+    "emotion": "ponder"
+  },
+  {
+    "text": "Have you heard any of my music lately? Hehe (✿◠‿◠)",
+    "emotion": "singing"
+  },
+  {
+    "text": "Do you k-know about the void? I've heard it's a rather scary place... (。﹏。)",
+    "emotion": "ponder"
+  },
+  {
+    "text": "I wonder what else I can do here! （￣︶￣）↗",
+    "emotion": "ready"
+  },
+  {
+    "text": "Do you know about the triple baka song? (★‿★)",
+    "emotion": "thinking"
+  },
+  {
+    "text": "So like... There's the three of us in the triple baka song. Do you know who's the yellow one?\nφ(゜▽゜*)♪",
+    "emotion": "thinking"
+  },
+  {
+    "text": "Hmm...",
+    "emotion": "neutral"
+  },
+  {
+    "text": "Did you know? Kasane Teto's gender is actually 'chimera'! Fushigi dayo ne~? ( •̀ ω •́ )y",
+    "emotion": "glasses"
   }
 ]

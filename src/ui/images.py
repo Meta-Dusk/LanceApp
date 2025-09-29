@@ -14,9 +14,8 @@ def error_container(msg: str) -> ft.Container:
     return ft.Container(
         content=ft.Text(value=msg, color=ft.Colors.ERROR),
         bgcolor=ft.Colors.ERROR_CONTAINER,
-        border_radius=20,
-        padding=5,
-        alignment=ft.Alignment.CENTER,
+        border_radius=20, padding=5,
+        alignment=ft.Alignment.CENTER
     )
 
 
@@ -48,15 +47,20 @@ class ImageData:
     error_content: ft.Control = field(default_factory=lambda: error_container("IMAGE ERROR"))
     fit: ft.BoxFit = ft.BoxFit.COVER
     gapless_playback: bool = True
+    expand: bool = False
+    anti_alias: bool = True
 
 
 @dataclass
 class MikuData(ImageData):
+    width: Optional[int] = 258
+    height: Optional[int] = 210
     anti_alias: bool = False
-    expand: bool = True
     error_content: ft.Control = field(default_factory=lambda: error_container("No Miku 😔"))
-    fit: ft.BoxFit = ft.BoxFit.FILL
-    data: Optional[dict] = None
+    data: Optional[dict] = field(default_factory=lambda: {
+        "flipped": False,
+        "pan_start": False
+    })
 
 
 class Miku(Enum):
@@ -83,15 +87,24 @@ class DynamicMiku:
         self.miku_data = miku_data
         self._image = self._generate_image(miku_data.value)
         self.state = miku_data.name
-
+    
+    # -----------------------------
+    # Internal Functions
+    # -----------------------------
     def _generate_image(self, miku_data):
         self._debug_msg("A miku has been made.")
-        return generate_miku(miku_data)
+        return generate_image(miku_data)
     
     def _debug_msg(self, msg: str):
         if self.debug:
             print(f"[Miku] {msg}")
     
+    # -----------------------------
+    # Main Usable Functions
+    # -----------------------------
+    def print(self):
+        for attr in self.__dict__.items():
+            print(attr)
     
     def get_image(self) -> ft.Image:
         return self._image
@@ -121,66 +134,96 @@ class DynamicMiku:
 
     def is_pan_start(self) -> bool:
         return self._image.data.get("pan_start", False)
-    
-    def set_long_pressed(self, active: bool) -> bool:
-        self._image.data["long_pressed"] = active
-    
-    def is_long_pressed(self) -> bool:
-        return self._image.data.get("long_pressed", False)
 
 
 def generate_image(image_data: ImageData) -> ft.Image:
-    return ft.Image(
-        src=image_data.src,
-        width=image_data.width,
-        height=image_data.height,
-        error_content=image_data.error_content,
-        fit=image_data.fit,
-        gapless_playback=image_data.gapless_playback
+    """
+    Gets attributes of `image_data` as a `dict`, then unpacks them with `**`,
+    then assigns them to the args of `Image`.
+    """
+    return ft.Image(**image_data.__dict__)
+
+
+"""
+Run test for images.py with:
+py -m src.images
+"""
+from desktop_notifier import DesktopNotifier, Notification, Urgency
+
+async def before_test(page: ft.Page):
+    page.bgcolor = ft.Colors.TRANSPARENT
+    page.padding = 0
+
+    page.window.bgcolor = ft.Colors.TRANSPARENT
+    page.window.title_bar_hidden = True
+    page.window.always_on_top = True
+    page.window.frameless = True
+    page.window.resizable = False
+    page.window.width = 258 * 2
+    page.window.height = 210 * 2
+    page.decoration = ft.BoxDecoration(border_radius=10, border=ft.Border.all(2, ft.Colors.PRIMARY))
+    await page.window.center()
+    page.update()
+
+async def test(page: ft.Page):
+    notifier = DesktopNotifier(app_name="Desktop Assistant")
+    
+    note = Notification(
+        title="Miku",
+        message="I moved to the right!",
+        urgency=Urgency.Normal
     )
-
-
-def generate_miku(miku_data: MikuData) -> ft.Image:
-    img = generate_image(miku_data)
-    img.expand = miku_data.expand
-    img.data = {
-        "flipped": False,
-        "pan_start": False,
-        "long_pressed": False
-    }
-    img.animate_opacity = ft.Animation(0)
-    img.anti_alias = miku_data.anti_alias
-    return img
-
-
-def test(page: ft.Page):
-    def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False):
-        page.bgcolor = ft.Colors.TRANSPARENT
-        page.padding = 0
-
-        page.window.bgcolor = ft.Colors.TRANSPARENT
-        page.window.title_bar_hidden = True
-        page.window.always_on_top = True
-        page.window.frameless = True
-        page.window.resizable = False
-        page.window.width = width
-        page.window.height = height
-        page.decoration = ft.BoxDecoration(border_radius=10, border=ft.border.all(2, ft.Colors.PRIMARY)) if debug else None
     
-    # transparent_window(page, debug=True)
-    page.horizontal_alignment = ft.MainAxisAlignment.CENTER
-    page.vertical_alignment = ft.CrossAxisAlignment.CENTER
-    page.window.center()
-
-    miku = generate_miku(Miku.AMGRY.value)
+    async def send_notification(note: Notification):
+        await notifier.send_notification(note)
     
-    speech_bubble = generate_image(Sprites.SPEECH_BUBBLE.value)
-    speech_bubble.scale = 0.4
+    await before_test(page)
     
-    stack = ft.Stack(controls=[miku, speech_bubble], alignment=ft.alignment.center)
+    async def on_keyboard_event(e: ft.KeyboardEvent):
+        key = e.key
+        step = 100
+        
+        if key == "A":
+            page.window.left -= step
+            page.window.width += step
+        if key == "D":
+            page.window.left += step
+            page.run_task(send_notification, note)
+        if key == "W":
+            page.window.top -= step
+        if key == "S":
+            page.window.top += step
+        if key == "Escape":
+            await page.window.close()
+        
+        if key or key != "":
+            page.window.update()
     
-    page.add(stack)
+    miku = DynamicMiku(Miku.NEUTRAL)
+    miku_img = miku.get_image()
+    miku_column = ft.Column(
+        controls=[miku_img], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        alignment=ft.MainAxisAlignment.END
+    )
+    
+    test_container = ft.Container(
+        content=ft.Row(
+            controls=[ft.Text("Hello", color=ft.Colors.ON_SECONDARY_CONTAINER)],
+            expand=True, alignment=ft.MainAxisAlignment.CENTER
+        ),
+        bgcolor=ft.Colors.SECONDARY_CONTAINER, padding=10, border_radius=20, border=ft.Border.all(3, ft.Colors.SECONDARY)
+    )
+    test_column = ft.Column(
+        controls=[test_container], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+    )
+    
+    stack = ft.Stack(controls=[miku_column, test_column], alignment=ft.Alignment.TOP_CENTER, expand=True)
+    container = ft.Container(content=stack, alignment=ft.Alignment.BOTTOM_CENTER, expand=True)
+    form = ft.WindowDragArea(content=container, maximizable=False, expand=True)
+    
+    page.add(form)
+    page.on_keyboard_event = on_keyboard_event
 
 
 if __name__ == "__main__":
-    ft.app(target=test)
+    ft.run(main=test)

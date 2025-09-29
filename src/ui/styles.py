@@ -12,18 +12,28 @@ def get_font_path(font_style: str) -> str:
 
 
 def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug: bool = False) -> None:
+    """Makes the window a formatted transparent view, perfect for Miku."""
     page.bgcolor = ft.Colors.TRANSPARENT
     page.padding = 0
     page.fonts = {font: get_font_path(font.value) for font in FontStyles}
     page.decoration = ft.BoxDecoration(border_radius=10, border=ft.Border.all(2, ft.Colors.PRIMARY)) if debug else None
+    page.theme_mode = ft.ThemeMode.DARK
     
     page.window.bgcolor = ft.Colors.TRANSPARENT
     page.window.title_bar_hidden = True
-    page.window.always_on_top = True
+    page.window.always_on_top = False
     page.window.frameless = True
     page.window.resizable = False
+    page.window.minimizable = False
+    page.window.maximizable = False
+    page.window.shadow = False
     page.window.width = width
     page.window.height = height
+    page.window.alignment = ft.Alignment.BOTTOM_CENTER
+    page.window.prevent_close = True
+    page.window.skip_task_bar = True
+    page.window.visible = False
+    page.update()
     
     # page.update()
     # page.appbar = ft.AppBar(

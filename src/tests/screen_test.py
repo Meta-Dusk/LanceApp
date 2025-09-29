@@ -1,6 +1,11 @@
 import flet as ft
 import screeninfo
 
+"""
+Run this test with:
+py -m src.tests.screen_test
+"""
+
 def main(page: ft.Page):
     def check_and_adjust_bounds(_):
         try:
@@ -28,7 +33,7 @@ def main(page: ft.Page):
             if win_top + win_height > screen_height:
                 page.window.top = screen_height - win_height
             
-            page.update()
+            page.window.update()
         except Exception as ex:
             print(f"Error adjusting bounds: {ex}")
     
