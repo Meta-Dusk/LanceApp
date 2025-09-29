@@ -40,3 +40,11 @@ def get_day_period(return_str: bool = True) -> TimePeriod | str:
         return str_or_enum(TimePeriod.AFTERNOON)
     else:
         return str_or_enum(TimePeriod.EVENING)
+
+def get_date() -> str:
+    """Returns the current date in English."""
+    return datetime.now().strftime("%A. %B %d, %Y")
+
+def get_time() -> str:
+    """Returns the current time in English."""
+    return datetime.now().strftime("%I:%M %p")

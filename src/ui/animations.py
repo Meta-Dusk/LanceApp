@@ -1,43 +1,74 @@
 import flet as ft
-
 import asyncio
 import math
 
+from utilities.debug import debug_msg
+
+
+# -------- Helpers --------
+def update_ctrl(ctrl: ft.LayoutControl) -> None:
+    if ctrl.page is not None:
+        ctrl.update()
 
 # -------- Setups --------
-def set_initial_animations(miku_img: ft.Image) -> None:
-    """Animations setup for Miku."""
-    miku_img.animate_rotation = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
-    miku_img.animate_scale = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
-    miku_img.animate_opacity = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
-    miku_img.rotate = 0
-    miku_img.scale = 0
-    miku_img.opacity = 0
+def anim_setup_main(ctrl: ft.LayoutControl) -> None:
+    """The animation setup for the main layout control."""
+    ctrl.animate_rotation = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.animate_scale = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.animate_opacity = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.rotate = 0
+    ctrl.scale = 0
+    ctrl.opacity = 0
+    
+def anim_setup_menu(ctrl: ft.LayoutControl) -> None:
+    """The animation setup for a menu layout control."""
+    ctrl.animate_offset = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.animate_opacity = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.animate_scale = ft.Animation(1000, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.offset = ft.Offset(x=0.0, y=1.0)
+    ctrl.opacity = 0
+    ctrl.scale = 0
 
 # -------- Animation Seqeuences --------
-async def opening_animation(page: ft.Page, miku_img: ft.Image) -> None:
-    """The application opening animation sequence for Miku."""
+async def opening_animation(ctrl: ft.LayoutControl) -> None:
+    """Application opening animation sequence for the main layout control."""
     await asyncio.sleep(0.1)
-    miku_img.scale = 1
-    miku_img.opacity = 1
-    miku_img.rotate = ft.Rotate(math.pi * 2)
-    miku_img.update()
+    ctrl.scale = 1
+    ctrl.opacity = 1
+    ctrl.rotate = ft.Rotate(math.pi * 2)
+    update_ctrl(ctrl)
     await asyncio.sleep(1)
-    miku_img.animate_scale = None
-    miku_img.animate_rotation = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
-    miku_img.rotate = 0
-    miku_img.update()
+    ctrl.animate_scale = None
+    ctrl.animate_rotation = ft.Animation(500, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.rotate = 0
+    update_ctrl(ctrl)
     
-async def exit_animation(miku_img: ft.Image, delay: float) -> None:
-    """The application exit animation sequence for Miku."""
+async def exit_animation(ctrl: ft.LayoutControl, delay: float, debug: bool = False) -> None:
+    """Application exit animation sequence for the main layout control."""
     delay_in_ms = int(delay * 1000)
-    print(f"Closing up after {delay_in_ms}ms ({delay}s)...")
-    miku_img.animate_rotation = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT_CUBIC)
-    miku_img.animate_opacity = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT)
-    miku_img.animate_scale = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT)
-    miku_img.update()
+    debug_msg(f"Exiting app after animation finishes in {delay_in_ms}ms ({delay}s).", debug=debug)
+    ctrl.animate_rotation = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT_CUBIC)
+    ctrl.animate_opacity = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT)
+    ctrl.animate_scale = ft.Animation(delay_in_ms, ft.AnimationCurve.EASE_IN_OUT)
+    update_ctrl(ctrl)
     await asyncio.sleep(0.1)
-    miku_img.rotate = ft.Rotate(math.pi * 2)
-    miku_img.opacity = 0
-    miku_img.scale = 0
-    miku_img.update()
+    ctrl.rotate = ft.Rotate(math.pi * 2)
+    ctrl.opacity = 0
+    ctrl.scale = 0
+    update_ctrl(ctrl)
+    
+async def show_menu_animation(ctrl: ft.LayoutControl, duration: float = 1):
+    """Animates a menu layout control with `duration`."""
+    ctrl.offset = ft.Offset(x=0.0, y=0.0)
+    ctrl.opacity = 1
+    ctrl.scale = 1
+    update_ctrl(ctrl)
+    await asyncio.sleep(duration)
+    
+async def exit_menu_animation(ctrl: ft.LayoutControl, duration: float = 1):
+    """Animates a menu layout control with `duration`. Returns used `duration`."""
+    ctrl.offset = ft.Offset(x=0.0, y=1.0)
+    ctrl.opacity = 0
+    ctrl.scale = 0
+    update_ctrl(ctrl)
+    await asyncio.sleep(duration)

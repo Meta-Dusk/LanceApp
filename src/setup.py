@@ -22,7 +22,7 @@ def set_win_pos_bc(monitors: List[Monitor], page: ft.Page):
 async def before_main_app(page: ft.Page, debug: bool = False):
     """Serves as the setup function. Must be called before the `main`."""
     # -------- Before Main App --------
-    transparent_window(page, height=260, debug=debug)
+    transparent_window(page, width=288, height=270, debug=debug)
     
     # -- Set Window Position --
     monitors = get_all_monitors()

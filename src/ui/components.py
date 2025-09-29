@@ -1,20 +1,32 @@
 import flet as ft
 
+from typing import Optional
 from ui.styles import FontStyles
 
 
-def default_text(value: str, size: ft.Number = 14) -> ft.Text:
+def default_text(value: str, size: ft.Number = 16, no_wrap: bool = False) -> ft.Text:
     """Returns a pre-styled text component."""
     return ft.Text(
         value=value, size=size,
         font_family=FontStyles.BLRRPIX,
+        text_align=ft.TextAlign.CENTER,
+        no_wrap=no_wrap
+    )
+
+def speech_bubble_text(msg: str, size: ft.Number = 16, text_emoticon: Optional[str] = None) -> ft.Text:
+    return ft.Text(
+        value=msg, spans=[
+            ft.TextSpan(text=msg),
+            ft.TextSpan(text=text_emoticon)
+        ], size=size,
+        font_family=FontStyles.BLRRPIX,
         text_align=ft.TextAlign.CENTER
     )
 
-def default_speech_bubble(msg: str) -> ft.Container:
+def default_speech_bubble(msg: str, text_emoticon: Optional[str] = None) -> ft.Container:
     """Returns the default speech bubble for Miku."""
     return ft.Container(
-        content=default_text(value=msg, size=16),
+        content=speech_bubble_text(msg=msg, text_emoticon=text_emoticon),
         bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE),
         border=ft.Border.all(4, ft.Colors.with_opacity(0.7, ft.Colors.BLUE_900)),
         padding=10, border_radius=15, alignment=ft.Alignment.TOP_CENTER,
@@ -26,15 +38,14 @@ def default_speech_bubble(msg: str) -> ft.Container:
 def default_container(content: ft.Control, expand: bool | int = True) -> ft.Container:
     """Returns a pre-styled container."""
     return ft.Container(
-        content=content, padding=10, border_radius=10,
+        content=content, padding=10, border_radius=10, alignment=ft.Alignment.CENTER,
         border=ft.Border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE_400)),
-        bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE), expand=expand,
-        alignment=ft.Alignment.CENTER
+        bgcolor=ft.Colors.with_opacity(0.95, ft.Colors.LIGHT_BLUE), expand=expand
     )
 
 def default_button(
     text: str = "Example Button",
-    on_click: ft.ControlEventHandler[ft.Button] | None = None
+    on_click: Optional[ft.ControlEventHandler[ft.Button]] = None
 ) -> ft.Button:
     """Returns a pre-styled button."""
     if on_click is None:
@@ -44,58 +55,4 @@ def default_button(
         content=default_text(value=text), expand=True,
         on_click=on_click,
         # col={"lg": 2, "md": 4, "xs": 8}
-    )
-
-def default_menu(title: str) -> ft.Container:
-    """Returns the default menu for Miku."""
-    count = 0
-    def on_click(_):
-        nonlocal count
-        count += 1
-        text = f"I'm a button ({count})"
-        extension = "---"
-        for _ in range(count):
-            extension += extension
-        text = f"{extension}{text}{extension}"
-        buttons.controls.append(default_button(text=text, on_click=on_click))
-        buttons.update()
-    
-    title_text = default_text(value=title, size=20)
-    title_container = default_container(content=title_text, expand=1)
-    title_row = ft.Row(
-        controls=[title_container], expand=True,
-        alignment=ft.MainAxisAlignment.CENTER,
-        vertical_alignment=ft.CrossAxisAlignment.CENTER
-    )
-    
-    test_button = default_button(text=f"I'm a button ({count})", on_click=on_click)
-    buttons = ft.ResponsiveRow(
-        controls=[test_button], expand=True,
-        alignment=ft.MainAxisAlignment.CENTER,
-        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-    )
-    button_column = ft.Column(
-        controls=[buttons], expand=True,
-        alignment=ft.MainAxisAlignment.CENTER,
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-        scroll=ft.ScrollMode.AUTO, height=80
-    )
-    button_row = ft.Row(
-        controls=[button_column], expand=True,
-        alignment=ft.MainAxisAlignment.CENTER,
-        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-    )
-    buttons_container = default_container(content=button_row, expand=2)
-    
-    main_column = ft.Column(
-        controls=[title_row, buttons_container], expand=True,
-        alignment=ft.MainAxisAlignment.CENTER
-    )
-    
-    return ft.Container(
-        content=main_column, expand=True,
-        bgcolor=ft.Colors.with_opacity(0.65, ft.Colors.LIGHT_BLUE),
-        padding=10, border_radius=15,
-        border=ft.Border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE_900)),
-        alignment=ft.Alignment.TOP_CENTER,
     )

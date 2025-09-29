@@ -36,6 +36,8 @@ class DeltaTimer:
         self._frame_time = 1 / target_fps if target_fps else 0
         self._target_fps = target_fps
         self._dt = 0.0
+        self._MIN_SLEEP_S = 0.001
+        self._MIN_DT_S = 0.001
 
     async def tick(self) -> float:
         """Advance the global clock and return delta time in seconds."""
@@ -44,10 +46,11 @@ class DeltaTimer:
 
         if self._target_fps and dt < self._frame_time:
             delay = self._frame_time - dt
-            await asyncio.sleep(round(delay, 2))
+            await asyncio.sleep(max(delay, self._MIN_SLEEP_S))
             now = time.perf_counter()
             dt = now - self._last_time
-            
+        
+        dt = max(dt, self._MIN_DT_S)
         self._last_time = now
         self._dt = dt
         return dt
