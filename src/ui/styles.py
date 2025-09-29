@@ -31,7 +31,6 @@ def transparent_window(page: ft.Page, width: int = 258, height: int = 210, debug
     page.window.height = height
     page.window.alignment = ft.Alignment.BOTTOM_CENTER
     page.window.prevent_close = True
-    page.window.skip_task_bar = True
     page.window.visible = False
     page.update()
     
