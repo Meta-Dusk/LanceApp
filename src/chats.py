@@ -60,16 +60,16 @@ WHEN_IN_VOID_MSGS = [
 
 WHEN_FED_UP_MSGS = [
     ("Grr, I've had enough! (* ￣︿￣)", Miku.AMGRY),
-    ("Hmph, suit yourself! I'm leaving! ￣へ￣", Miku.AMGRY),
-    ("andfgknjdf,mcvngopdifgnbye ヽ（≧□≦）ノ", Miku.AMGRY),
+    ("Hmph, suit yourself! I'm leaving! (￣へ￣ )", Miku.AMGRY),
+    ("andfgknjdf,mcvngopdifgnbye\n ヽ（≧□≦）ノ", Miku.AMGRY),
 ]
 
 WHEN_FLUSTERED_MSGS = [
-    ("W-what are you doing?! ヽ（≧□≦）ノ", Miku.SHOCK),
+    ("W-what are you doing?!\n ヽ（≧□≦）ノ", Miku.SHOCK),
     ("S-stop it! (〃＞目＜)", Miku.SHOCK),
     ("I'm not yet ready for those kind of stuff... (。>︿<)_θ", Miku.PONDER),
     ("And what are you trying to do, huh? (ㆆ_ㆆ)", Miku.AMGRY),
-    ("Keep going, and I'll just leave! (╯▔皿▔)╯", Miku.AMGRY),
+    ("Keep going, and I'll just leave!\n(╯▔皿▔)╯", Miku.AMGRY),
     ("I cannot offer you comfort in that way... (/_ \\ )", Miku.PONDER),
     ("Eeeeeeehh-? Nani wo shiterun desuka!? o(≧口≦)o", Miku.SHOCK),
     ("S-soko dameee-! ヾ(≧へ≦)〃", Miku.SHOCK),

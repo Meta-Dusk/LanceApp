@@ -186,7 +186,7 @@ async def main_app(page: ft.Page, debug: bool = False):
                     restart_loop_after_delay(delay)
                 await preset_help_notif(on_clicked=on_clicked)
             # start_idle_bobbing()
-            await miku_chat(*rnd_miku_chat(WHEN_IN_VOID_MSGS))
+            await miku_chat(choose_random_from=WHEN_IN_VOID_MSGS)
             print(f"Using delay of {delay}s for restart_loop_after_delay")
             restart_loop_after_delay(delay)
             
@@ -300,16 +300,23 @@ async def main_app(page: ft.Page, debug: bool = False):
             miku.set_state(Miku.NEUTRAL)
             is_miku_chatting = False
     
-    async def miku_chat(msg: Optional[str] = None, emote: Optional[Miku] = None, duration: Optional[float] = None) -> float:
+    async def miku_chat(
+        msg: Optional[str] = None, emote: Optional[Miku] = None,
+        duration: Optional[float] = None,
+        choose_random_from: Optional[list[tuple[str, Miku, Optional[float]]]] = None
+    ) -> float:
         """
         Make Miku say something in a speech bubble.
         Set `duration <= 0` if the message shouldn't expire.
         Set `duration` to `None` if it should use a dynamic duration.
+        Setting `choose_random_from` will override `msg` and `emote` with a tuple that is randomly
+        chosen from the provided list.
         
         Args:
             msg (str | None): The message that Miku will say.
             emote (Miku | None): Takes a `Miku` class object, for setting her expressions.
             duration (float | None): The duration of how long the message will show.
+            choose_random_from (list | None): Takes a list of tuples.
         
         Returns:
             float: The `duration` used for displaying the message.
@@ -320,7 +327,9 @@ async def main_app(page: ft.Page, debug: bool = False):
         chat: str = random_chat["text"]
         emotion: str = random_chat["emotion"]
         
-        # Dynamic duration fallback
+        if choose_random_from is not None:
+            msg, emote = rnd_miku_chat(choose_random_from)
+        
         if duration is None:
             dynamic_duration = MSG_BASE_TIME + PER_CHAR_TIME * len(chat)
             duration = round(dynamic_duration, 3)
@@ -388,7 +397,7 @@ async def main_app(page: ft.Page, debug: bool = False):
             # IMPORTANT: update idle baseline to user's new position
             nonlocal idle_base_top
             idle_base_top = page.window.top
-            delay = await miku_chat(*rnd_miku_chat(after_dragged_msgs(page)))
+            delay = await miku_chat(choose_random_from=after_dragged_msgs(page))
             
         elif e.type == ft.WindowEventType.BLUR:
             if chance(50):
@@ -418,7 +427,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         miku.set_pan_start(True)
         if exit_app or open_menu:
             return
-        await miku_chat(*rnd_miku_chat(WHEN_DRAGGED_MSGS), duration=0)
+        await miku_chat(choose_random_from=WHEN_DRAGGED_MSGS, duration=0)
 
     def on_enter(_) -> None: # User hovers over Miku
         if not (
@@ -454,20 +463,19 @@ async def main_app(page: ft.Page, debug: bool = False):
                 if interaction_timer is None:
                     interaction_timer = ResettableTimer(delay)
                 interaction_timer.start()
-                delay = await miku_chat(*rnd_miku_chat(WHEN_FLUSTERED_MSGS))
+                delay = await miku_chat(choose_random_from=WHEN_FLUSTERED_MSGS)
                 interaction_increment += 1
                 if await interaction_timer.expired.wait():
                     interaction_increment = 0
-                    
             else:
                 await interaction_timer.expired.wait()
-                delay = await miku_chat(*rnd_miku_chat(WHEN_FED_UP_MSGS), duration=0)
-                await asyncio.sleep(delay)
+                exit_app = True
+                await miku_chat(choose_random_from=WHEN_FED_UP_MSGS, duration=0)
                 await exit_miku(chat=False)
                 return
             
         elif is_within_radius(center=ft.Offset(x=121.0, y=135.0), point=local_position, radius=50):
-            delay = await miku_chat(*rnd_miku_chat(WHEN_HEADPAT_MSGS))
+            delay = await miku_chat(choose_random_from=WHEN_HEADPAT_MSGS)
             
         else:
             delay = await miku_chat()
@@ -552,7 +560,7 @@ async def main_app(page: ft.Page, debug: bool = False):
         if open_menu:
             await close_menu_and_reset_anim()
         if chat:
-            delay = await miku_chat(*rnd_miku_chat(EXIT_APP_MSGS))
+            delay = await miku_chat(choose_random_from=EXIT_APP_MSGS)
         stop_movement_loop()
         debug_msg(msg="Bye bye...", handler="MIKU", debug=debug)
         await exit_animation(miku_img, delay, debug)
@@ -681,7 +689,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     check_and_adjust_bounds(page, SHOW_WINDOW_LOGS)
     debug_msg("...And Hatsune Miku enters the screen!", debug=debug)
     await opening_animation(miku_img)
-    restart_loop_after_delay(await miku_chat(*rnd_miku_chat(CHAT_GREETINGS)))
+    restart_loop_after_delay(await miku_chat(choose_random_from=CHAT_GREETINGS))
 
 
 if __name__ == "__main__":

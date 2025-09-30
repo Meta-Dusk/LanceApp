@@ -1,6 +1,6 @@
 [project]
 name = "MikuMiku"
-version = "0.4.0"
+version = "0.4.1"
 description = "A Flet App Made for Lance"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.13"
