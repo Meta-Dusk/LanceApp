@@ -1,6 +1,7 @@
 import asyncio, time
 
 class ResettableTimer:
+    """An asynchronous timer that can be reset while running."""
     def __init__(self, duration: float):
         self.duration = duration
         self._task = None
@@ -31,13 +32,17 @@ class ResettableTimer:
             self._task = None
 
 class DeltaTimer:
+    """
+    A global timer that serves as a machine-independent
+    frame delay for implementations with FPS.
+    """
     def __init__(self, target_fps: float | None = None):
         self._last_time = time.perf_counter()
         self._frame_time = 1 / target_fps if target_fps else 0
         self._target_fps = target_fps
         self._dt = 0.0
-        self._MIN_SLEEP_S = 0.001
-        self._MIN_DT_S = 0.001
+        self._MIN_SLEEP_S = 0.01
+        self._MIN_DT_S = 0.01
 
     async def tick(self) -> float:
         """Advance the global clock and return delta time in seconds."""
@@ -59,7 +64,3 @@ class DeltaTimer:
     def delta(self) -> float:
         """Get the most recent delta time."""
         return self._dt
-
-
-# Create a single global timer (e.g. 60 FPS cap)
-# global_timer = DeltaTimer(target_fps=60)

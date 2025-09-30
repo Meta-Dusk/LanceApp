@@ -60,7 +60,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     # Movement
     MIKU_MV_FREQ_MS:    Tuple[int, int] = (2000, 3000) # Frequency of randomized Miku movement
     MIKU_MV_STEP:       Tuple[int, int] = (-300, 300)  # Range of randomized Miku movement
-    MIKU_RT_MOD:        float = 0.15                   # Rotation modifier for Miku flip
+    MIKU_RT_MOD:        float = 0.125                  # Rotation modifier for Miku flip
     MIKU_FLIP_CHANCE:   int = 5                        # Chance of Miku flip out of 100%
     MIKU_CHAT_CHANCE:   int = 20                       # Chance for Miku to randomly chat out of 100%
     FPS:                float = 60.0                   # For smooth movement animation
@@ -137,7 +137,7 @@ async def main_app(page: ft.Page, debug: bool = False):
             start_movement_loop()
             return
         
-        restart_timer_task = asyncio.create_task(coro=delayed_restart(), name="delay_restart")
+        restart_timer_task = asyncio.create_task(coro=delayed_restart(), name="delayed_restart")
         
     # -------- Movement (Smooth OS Window Animation) --------
     async def movement_loop() -> None:
@@ -215,6 +215,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     ) -> None:
         """Smoothly animate the OS window horizontally with ease-out curve and jiggle."""
         nonlocal idle_base_top
+        idle_base_top = page.window.top
         stop_idle_bobbing()
         if step == 0:
             start_idle_bobbing() # nothing to move; ensure idle is running again
@@ -471,20 +472,9 @@ async def main_app(page: ft.Page, debug: bool = False):
         else:
             delay = await miku_chat()
         restart_loop_after_delay(delay)
-        
-    
-    async def close_menu_with_anim() -> None:
-        nonlocal miku_img_container, menu_container
-        await miku_chat(msg="Closing the menu! o(*￣︶￣*)o", emote=Miku.HAPPY)
-        await exit_menu_animation(menu_ctrl)
-        miku_img_container.expand = True
-        menu_container.visible = False
-        page.window.height -= HEIGHT_INCREASE
-        page.window.width -= WIDTH_INCREASE
-        page.window.top += HEIGHT_INCREASE
     
     async def on_double_tap(_) -> None:
-        nonlocal open_menu, menu_container, menu
+        nonlocal open_menu, menu_container
         if exit_app:
             return
         debug_msg(f"{"Opening" if not open_menu else "Closing"} the menu!", debug=debug)
@@ -499,10 +489,9 @@ async def main_app(page: ft.Page, debug: bool = False):
             miku_img_container.expand = False
             menu_container.visible = True
             page.update()
-            await asyncio.sleep(0.1)
-            await show_menu_animation(menu_ctrl)
+            await show_menu_animation(main_menu_ctrl)
         else:
-            await close_menu_with_anim()
+            await close_menu_and_reset_anim()
             start_idle_bobbing()
             restart_loop_after_delay(await miku_chat())
             page.update()
@@ -561,7 +550,7 @@ async def main_app(page: ft.Page, debug: bool = False):
     async def exit_miku(chat: bool = True) -> None:
         delay: float = 1
         if open_menu:
-            await close_menu_with_anim()
+            await close_menu_and_reset_anim()
         if chat:
             delay = await miku_chat(*rnd_miku_chat(EXIT_APP_MSGS))
         stop_movement_loop()
@@ -570,6 +559,30 @@ async def main_app(page: ft.Page, debug: bool = False):
         stop_idle_bobbing()
         await asyncio.sleep(delay)
         await cleanup_then_exit()
+    
+    async def close_all_visible_menus_anim() -> None:
+        for menu in menu_column.controls:
+            if menu.visible:
+                await exit_menu_animation(menu)
+    
+    async def close_menu_and_reset_anim() -> None:
+        nonlocal miku_img_container, menu_container
+        await miku_chat(msg="Closing the menu! o(*￣︶￣*)o", emote=Miku.HAPPY)
+        await close_all_visible_menus_anim()
+        miku_img_container.expand = True
+        menu_container.visible = False
+        page.window.height -= HEIGHT_INCREASE
+        page.window.width -= WIDTH_INCREASE
+        page.window.top += HEIGHT_INCREASE
+        page.update()
+        
+    async def open_test_menu() -> None:
+        await close_all_visible_menus_anim()
+        await show_menu_animation(test_menu_ctrl)
+    
+    async def close_test_menu() -> None:
+        await close_all_visible_menus_anim()
+        await show_menu_animation(main_menu_ctrl)
         
     # -------- Setup Miku --------
     miku = DynamicMiku(Miku.NEUTRAL, debug=False)
@@ -581,17 +594,29 @@ async def main_app(page: ft.Page, debug: bool = False):
         expand=True
     )
     
-    menu = DefaultMenu("-- Action Menu --\nSelect any option from below to try!")
-    menu.add_button("Ask Miku to Exit the App", lambda e: asyncio.create_task(
+    main_menu = DefaultMenu("-- Action Menu --\nSelect any option from below to try!")
+    main_menu.add_button("Ask Miku to Exit the App", lambda e: asyncio.create_task(
         coro=exit_miku(), name=f"{e.name} -> exit_miku()"))
-    menu.add_button("Talk With Miku", lambda e: asyncio.create_task(
+    main_menu.add_button("Talk With Miku", lambda e: asyncio.create_task(
         coro=miku_chat(), name=f"{e.name} -> miku_chat()"))
-    menu.add_button("Ask Miku the Date and Time", lambda e: asyncio.create_task(
+    main_menu.add_button("Ask Miku the Date and Time", lambda e: asyncio.create_task(
         coro=miku_chat(f"Today is {get_date()}, and the time is {get_time()}! []~(￣▽￣)~*", Miku.READING),
         name=f"{e.name} -> miku_chat()"))
-    menu_ctrl = menu.build()
+    main_menu.add_button("Test Another Menu", lambda e: asyncio.create_task(
+        coro=open_test_menu(), name=e.name
+    ))
+    main_menu_ctrl = main_menu.build()
+    
+    test_menu = DefaultMenu("-- Test Menu --\nI don't do anything yet.")
+    test_menu.add_button("Go Back", lambda e: asyncio.create_task(
+        coro=close_test_menu(), name=e.name
+    ))
+    test_menu.add_button("I'm a Button")
+    test_menu.add_button("I'm a Button as well")
+    test_menu_ctrl = test_menu.build()
+    
     menu_column = ft.Column(
-        controls=[menu_ctrl], expand=True,
+        controls=[main_menu_ctrl, test_menu_ctrl], expand=True,
         alignment=ft.MainAxisAlignment.CENTER,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
     )

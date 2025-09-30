@@ -7,42 +7,35 @@ from ui.animations import anim_setup_menu
 
 class DefaultMenu:
     """Dynamic menu with title and buttons."""
-    def __init__(self, title: str):
+    def __init__(self, title: str, visible: bool = False):
         # Title
         title_text = default_text(value=title, size=20)
         title_container = default_container(content=title_text, expand=True)
         title_row = ft.Row(
-            controls=[title_container],
-            expand=True,
+            controls=[title_container], expand=True,
             alignment=ft.MainAxisAlignment.CENTER,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
         title_row_container = ft.Container(
-            content=title_row,
+            content=title_row, expand=1,
             alignment=ft.Alignment.CENTER,
-            expand=1,
         )
 
         # Buttons (start empty)
         self._buttons = ft.ResponsiveRow(
-            controls=[],
-            expand=True,
+            controls=[], expand=True, spacing=10,
             alignment=ft.MainAxisAlignment.CENTER,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=10,
             run_spacing=10,
         )
         self._button_column = ft.Column(
             controls=[self._buttons],
-            expand=True,
+            expand=True, height=80, scroll=ft.ScrollMode.ALWAYS,
             alignment=ft.MainAxisAlignment.CENTER,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            scroll=ft.ScrollMode.AUTO,
-            height=80,
         )
         button_row = ft.Row(
-            controls=[self._button_column],
-            expand=True,
+            controls=[self._button_column], expand=True,
             alignment=ft.MainAxisAlignment.CENTER,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
@@ -51,19 +44,15 @@ class DefaultMenu:
         # Main column
         main_column = ft.Column(
             controls=[title_row_container, buttons_container],
-            expand=True,
-            alignment=ft.MainAxisAlignment.CENTER,
+            alignment=ft.MainAxisAlignment.CENTER, expand=True,
         )
 
         # Root container
         self.container = ft.Container(
-            content=main_column,
-            expand=True,
-            padding=10,
-            border_radius=15,
+            content=main_column, expand=True, padding=10, border_radius=15,
             bgcolor=ft.Colors.with_opacity(0.65, ft.Colors.LIGHT_BLUE),
             border=ft.Border.all(4, ft.Colors.with_opacity(0.5, ft.Colors.BLUE_900)),
-            alignment=ft.Alignment.TOP_CENTER,
+            alignment=ft.Alignment.TOP_CENTER, visible=visible
         )
 
         anim_setup_menu(self.container)
