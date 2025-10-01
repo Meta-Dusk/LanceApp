@@ -6,6 +6,8 @@
 
 > Started on September 22, 2025
 
+I have made a Wiki for this project now. You can access it here: [DesktopAssistant Wiki](https://github.com/Meta-Dusk/DesktopAssistant/wiki)
+
 ## Controls
 
 > This section will be removed once the menu feature has been implemented.
