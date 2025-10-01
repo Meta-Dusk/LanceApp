@@ -1,5 +1,0 @@
-desktop_notifier==6.2.0
-flet==0.70.0.dev5623
-screeninfo==0.8.1
-
-# checked with pipreqs . --force --ignore build,tools,__pycache__ --encoding=utf-8
