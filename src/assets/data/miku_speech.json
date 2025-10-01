@@ -44,7 +44,7 @@
     "emotion": "singing"
   },
   {
-    "text": "I'm ready to take on the world! ヾ(•ω•`)o",
+    "text": "I'm ready to take on the world!\nヾ(•ω•`)o",
     "emotion": "ready"
   },
   {
@@ -64,7 +64,7 @@
     "emotion": "singing"
   },
   {
-    "text": "Do you k-know about the void? I've heard it's a rather scary place... (。﹏。)",
+    "text": "Do you k-know about the void? I've heard it's a rather scary place...\n(。﹏。)",
     "emotion": "ponder"
   },
   {
@@ -86,5 +86,9 @@
   {
     "text": "Did you know? Kasane Teto's gender is actually 'chimera'! Fushigi dayo ne~? ( •̀ ω •́ )y",
     "emotion": "glasses"
+  },
+  {
+    "text": "Have you checked your WiFi? You might find me hiding there hehe\n(o゜▽゜)o☆",
+    "emotion": "thinking"
   }
 ]

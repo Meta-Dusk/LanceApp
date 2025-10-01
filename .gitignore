@@ -167,3 +167,6 @@ storage/
 
 # Settings
 settings.json
+
+# Tests
+tests/

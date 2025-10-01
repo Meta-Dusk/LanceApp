@@ -1,6 +1,6 @@
 [project]
 name = "MikuMiku"
-version = "0.4.0"
+version = "0.4.1"
 description = "A Flet App Made for Lance"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.13"
@@ -11,8 +11,10 @@ license = { text = "MIT" }
 
 dependencies = [
   "flet==0.70.0.dev5623",
+  "flet-desktop==0.70.0.dev5623",
   "screeninfo==0.8.1",
-  "desktop_notifier==6.2.0"
+  "desktop_notifier==6.2.0",
+  "pip"   # Just so flet can install properly
 ]
 
 [tool.flet]
@@ -46,8 +48,3 @@ message = "Preparing Hatsune Miku... Just a bit longer..."
 [tool.flet.app.startup_screen]
 show = true
 message = "Waking Hatsune Miku up... Please wait."
-
-[tool.uv]
-dev-dependencies = [
-  "flet==0.70.0.dev5623",
-]

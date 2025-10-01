@@ -1,10 +1,37 @@
 # A Desktop Assistant App made especially for Marcus Lance
 
-> Current version: v0.4.0
+> Current version: v0.4.1
 
 **Happy Birthday, Marcus Lance!**
 
 > Started on September 22, 2025
+
+I just made a Wiki for this project, you can access it here now: [DesktopAssistant Wiki](https://github.com/Meta-Dusk/DesktopAssistant/wiki)
+
+> I'm thinking if I should just move everything to the Wiki instead of having most of the information here in the `README.md`... Should I?
+
+## Features
+
+1. Hatsune Miku
+2. Randomized Movement
+3. Randomized Messages
+4. Different Expressions
+5. Flips
+6. Animations
+7. A Menu
+
+## Planned Features
+
+1. SFX
+2. More Easter Eggs
+3. Extensive Menus **< (In Development in Experimental)**
+4. Settings Menu **< (In Development in Experimental)**
+5. Minigames
+6. Make Miku an actual "Desktop Assistant" and not just a pet
+
+## Unintended Behaviors
+
+- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker... **Mikus Galore!** (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)
 
 ## Controls
 
@@ -60,26 +87,3 @@ Open a menu. Refer to the [Controls](#controls) section.
 7. **(Potentially Fixed)** When launching the app, it sometiems refuses to show itself, thus forcing the app to become a background process, which can only be exited by ending it in the task manager, which is very inconvenient.
     - You can try [Fix 1](#fix-1) but I sure hope this doesn't happen **at all**.
     - I've implemented a hot fix for this, and the possible reason for this issue, is with how `flet` handles page visibility, when it has been initially set to `False`.
-
-## Features
-
-1. Hatsune Miku
-2. Randomized Movement
-3. Randomized Messages
-4. Different Expressions
-5. Flips
-6. Animations
-7. A Menu
-
-## Planned Features
-
-1. SFX
-2. More Easter Eggs
-3. Extensive Menus **< (In Development in Experimental)**
-4. Settings Menu **< (In Development in Experimental)**
-5. Minigames
-6. Make Miku an actual "Desktop Assistant" and not just a pet
-
-## Unintended Behaviors
-
-- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker... **Mikus Galore!** (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)

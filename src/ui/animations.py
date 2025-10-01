@@ -59,6 +59,9 @@ async def exit_animation(ctrl: ft.LayoutControl, delay: float, debug: bool = Fal
     
 async def show_menu_animation(ctrl: ft.LayoutControl, duration: float = 1):
     """Animates a menu layout control with `duration`."""
+    ctrl.visible = True
+    update_ctrl(ctrl)
+    await asyncio.sleep(0.1)
     ctrl.offset = ft.Offset(x=0.0, y=0.0)
     ctrl.opacity = 1
     ctrl.scale = 1
@@ -72,3 +75,5 @@ async def exit_menu_animation(ctrl: ft.LayoutControl, duration: float = 1):
     ctrl.scale = 0
     update_ctrl(ctrl)
     await asyncio.sleep(duration)
+    ctrl.visible = False
+    update_ctrl(ctrl)
