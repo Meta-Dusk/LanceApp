@@ -1,72 +1,70 @@
 # A Desktop Assistant App made especially for Marcus Lance
 
-> Current version: v0.4.1
-
 **Happy Birthday, Marcus Lance!**
 
+> Current version: v0.4.1
+> 
 > Started on September 22, 2025
+
+# Wiki
 
 I just made a Wiki for this project, you can access it here now: [DesktopAssistant Wiki](https://github.com/Meta-Dusk/DesktopAssistant/wiki)
 
 > I'm thinking if I should just move everything to the Wiki instead of having most of the information here in the `README.md`... Should I?
 
-## Features
+# Feature List
 
-1. Hatsune Miku
-2. Randomized Movement
-3. Randomized Messages
-4. Different Expressions
-5. Flips
-6. Animations
-7. A Menu
+Below are the current features implemented:
 
-## Planned Features
+| Feature | Description |
+| ----------- | ----------- |
+| **Hatsune Miku** | She'll always be added :) |
+| **Randomized Movement** | Miku can move randomly horizontally |
+| **Randomized Messages** | Miku has a wide selection of monologues that she'll say |
+| **Different Expressions** | Miku has at least 9 different expressions she can choose from |
+| **Flips** | Yes, Miku has a small chance of doing two flips during a movement command |
+| **Animations** | Various smooth animations |
+| **A Menu** | So far, there's only one menu for now |
 
-1. SFX
-2. More Easter Eggs
-3. Extensive Menus **< (In Development in Experimental)**
-4. Settings Menu **< (In Development in Experimental)**
-5. Minigames
-6. Make Miku an actual "Desktop Assistant" and not just a pet
+# Planned Features
 
-## Unintended Behaviors
+The planned features below can be found in the `experimental branch` once development has begun.
+
+| Feature | Description | Completion |
+| ----------- | ----------- | ----------- |
+| **SFX** | Sound effects for Miku | 0% |
+| **Easter Eggs** | Some special interactions for Miku | 5% |
+| **Extensive Menus** | Add more options and customizability to the menus | 5% |
+| **Settings Menu** | For certain stuff | 0% |
+| **Minigames** | Games that you can play with Miku | 0% |
+| **Desktop Assistance** | Stuff that could actually assist you with your pc | 0% |
+
+# Unintended Behaviors
 
 - You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker... **Mikus Galore!** (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)
 
-## Controls
+# Controls
 
 > This section will be removed once the menu feature has been implemented.
 > The controls being referred here are for interacting with Miku, or used directly on her.
 
-### Left-click
+**Left Click**
 
-Default interaction. Click twice for a menu. Clicking then holding is a placeholder for now.
+- Default interaction. Click twice for a menu. Clicking then holding is a placeholder for now.
 
-### Right-click
+**Right Click**
 
-Click twice to exit.
+- Click twice to exit.
 
-### Left-click + drag
+**Left Click + drag**
 
-Will move Miku around.
+- Will move Miku around.
 
-## Known Issues and Fixes
+# Known Issues and Fixes
 
 Please do report any issues found that are not solvable with the fixes provided below:
 
-### Fix 1
-
-Relaunch the app. Refer to the [Controls](#controls) section.
-
-### Fix 2
-
-Move Miku around your screen, then stop. Refer to the [Controls](#controls) section.
-
-### Fix 3
-
-Open a menu. Refer to the [Controls](#controls) section.
-
-### The Known Issues
+## The Known Issues
 
 1. Miku, the window, or the speech bubble appears to be stretched, clipped, or stretched.
     - Try [Fix 3](#fix-3) first then [Fix 1](#fix-1) if it doesn't work.
@@ -87,3 +85,15 @@ Open a menu. Refer to the [Controls](#controls) section.
 7. **(Potentially Fixed)** When launching the app, it sometiems refuses to show itself, thus forcing the app to become a background process, which can only be exited by ending it in the task manager, which is very inconvenient.
     - You can try [Fix 1](#fix-1) but I sure hope this doesn't happen **at all**.
     - I've implemented a hot fix for this, and the possible reason for this issue, is with how `flet` handles page visibility, when it has been initially set to `False`.
+  
+## Fix 1
+
+Relaunch the app. Refer to the [Controls](#controls) section.
+
+## Fix 2
+
+Move Miku around your screen, then stop. Refer to the [Controls](#controls) section.
+
+## Fix 3
+
+Open a menu. Refer to the [Controls](#controls) section.
