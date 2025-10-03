@@ -1,4 +1,4 @@
-# A Desktop Assistant App made especially for Marcus Lance
+# A Desktop Assistant App Made Especially for Marcus Lance
 
 **Happy Birthday, Marcus Lance!**
 
@@ -60,42 +60,31 @@ Below is what this unintended behavior would look like:
 > This section will be removed once the menu feature has been implemented.
 > The controls being referred here are for interacting with Miku, or used directly on her.
 
-**Left Click**
-
-- Default interaction. Click twice for a menu. Clicking then holding is a placeholder for now.
-
-**Right Click**
-
-- Click twice to exit.
-
-**Left Click + drag**
-
-- Will move Miku around.
+| Button | Action | Additional Actions |
+| ----------- | ----------- | ----------- |
+| **Left Click** | Default interaction. | [1] Click twice to open/close the menu.<br> [2] Click and hold to drag Miku around. |
+| **Right Click** | Clicking will open a prompt for exiting. | Click again to exit. <br> > (Doing *Right Click* twice will **exit** the app) |
 
 # Known Issues and Fixes
 
-Please do report any issues found that are not solvable with the fixes provided below:
+Please do report any issues found that are not solvable with the fixes provided in the tables below:
 
-## The Known Issues
+## Known Issues List
 
-| Issue No. | Issue | Description | The Fix | Is Fixed? |
+| No. | Issue | Description | Any Fixes? | Is it Fixed? |
 | ----------- | ----------- | ----------- | ----------- | ----------- |
-| 1 | Miku, the window, or the speech bubble appears to be stretched, clipped, or stretched. | This issue could be because of how `Flet` handles transparent windows. | Try [Fix 3](#fix-3) first then [Fix 1](#fix-1) if it doesn't work. | Nope, occurrs sometimes. |
-| 2 | A border around Miku appears during app launch. | This issue could also be because of how `Flet` handles transparent windows. | Try [Fix 1](#fix-1). | Nope, occurrs sometimes. |
-| 3 | Miku suddenly stops her idle animation. | This issue occurs when clicking her registers as a drag event, but is immediately canceled, resulting in the events not registering correctly. | Try [Fix 2](#fix-2). | Only happens during overlapping action registers. |
-| 4 | After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but nothing serious. | This issue is still under scrutiny. | Fixes itself. | Happens rarely, and probably also during overlapping action registers. |
+| 1 | Miku, the window, or the speech bubble appears to be stretched, clipped, or stretched. | This issue could be because of how `Flet` handles transparent windows. | Try **Fix No. 3** first then **Fix No. 1** if it doesn't work. | Nope, only occurs sometimes. |
+| 2 | A border around Miku appears during app launch. | This issue could also be because of how `Flet` handles transparent windows. | Try **Fix No. 1**. | Nope, only occurs sometimes. |
+| 3 | Miku suddenly stops her idle animation. | This issue occurs when clicking her registers as a drag event, but is immediately canceled, resulting in the events not registering correctly. | Try **Fix No. 2**. | Only occurs during overlapping action registers. |
+| 4 | After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but nothing serious. | This issue is still under scrutiny. | Fixes itself. | Occurs rarely, and probably also during overlapping action registers. |
 | 5 | Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds of the monitor. | This issue is still under scrutiny. | Fixes itself if you just don't drag her way below the boundaries of your monitor. | Happens all the time based on my testing. |
-| 6 | When launching the app, it sometimes just doesn't stop loading. | This issue is still under scrutiny. | Try [Fix 1](#fix-1). | Probably only happens if your device has a lot of background apps. |
-| 7 | When launching the app, it sometiems refuses to show itself, thus forcing the app to become a background process, which can only be exited by ending it in the task manager, which is very inconvenient. | I've implemented a hot fix for this, and the possible reason for this issue, is with how `flet` handles page visibility, when it has been initially set to `False`. | You can try [Fix 1](#fix-1) if it happens. | This issue **should be fixed** by now, as I've applied a hot fix for this. |
-  
-## Fix 1
+| 6 | When launching the app, it sometimes just doesn't stop loading. | This issue is still under scrutiny. | Try **Fix No. 1**. | Probably only happens if your device has a lot of background apps. |
+| 7 | ~When launching the app, it sometimes refuses to show itself, thus forcing the app to become a background process, which can only be exited by ending it in the task manager, which is very inconvenient.~ | I've implemented a hot fix for this, and the possible reason for this issue, is with how `flet` handles page visibility, when it has been initially set to `False`. | You can try **Fix No. 1** if it happens. | This issue **should be fixed** by now, as I've applied a hot fix for this. |
 
-Relaunch the app. Refer to the [Controls](#controls) section.
+## Known Solutions List
 
-## Fix 2
-
-Move Miku around your screen, then stop. Refer to the [Controls](#controls) section.
-
-## Fix 3
-
-Open a menu. Refer to the [Controls](#controls) section.
+| No. | Solution | Note |
+| ----------- | ----------- | ----------- |
+| 1 | Relaunch the app. | Refer to the [Controls](#controls) section. |
+| 2 | Move Miku around your screen, then stop. | Refer to the [Controls](#controls) section. |
+| 3 | Open any menu. | Refer to the [Controls](#controls) section. |
