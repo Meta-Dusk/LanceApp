@@ -6,6 +6,12 @@
 > 
 > Started on September 22, 2025
 
+# Preview
+
+Below is a preview of what you'd expect with the app (which is the latest release: v0.4.0):
+
+![MikuMiku App v0.4.0 Preview GIF](https://github.com/user-attachments/assets/743c5e1e-82b9-4eb1-bb8c-a431f940287e)
+
 # Wiki
 
 I just made a Wiki for this project, you can access it here now: [DesktopAssistant Wiki](https://github.com/Meta-Dusk/DesktopAssistant/wiki)
@@ -30,18 +36,24 @@ Below are the current features implemented:
 
 The planned features below can be found in the `experimental branch` once development has begun.
 
-| Feature | Description | Completion |
-| ----------- | ----------- | ----------- |
-| **SFX** | Sound effects for Miku | 0% |
-| **Easter Eggs** | Some special interactions for Miku | 5% |
-| **Extensive Menus** | Add more options and customizability to the menus | 5% |
-| **Settings Menu** | For certain stuff | 0% |
-| **Minigames** | Games that you can play with Miku | 0% |
-| **Desktop Assistance** | Stuff that could actually assist you with your pc | 0% |
+| Feature | Description | Completion | Version Implemented |
+| ----------- | ----------- | ----------- | ----------- |
+| **SFX** | Sound effects for Miku | 0% | - |
+| **Easter Eggs** | Some special interactions for Miku | 5% | 0.3.0 -> Current |
+| **Extensive Menus** | Add more options and customizability to the menus | 5% | 0.4.1 (Current Pre-Release) |
+| **Settings Menu** | For certain stuff | 0% | - |
+| **Minigames** | Games that you can play with Miku | 0% | - |
+| **Desktop Assistance** | Stuff that could actually assist you with your pc | 0% | - |
 
 # Unintended Behaviors
 
-- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker... **Mikus Galore!** (This is a bit buggy, but works, and may or may not use a lot of your pc's resources)
+- You can run multiple instances of Miku, by just simply running the executable again; the result is a shocker... **Mikus Galore!** (There's some visual bugs, such as `z-fighting`[^1], but it does work, and may or may not use a lot of your pc's resources).
+
+Below is what this unintended behavior would look like:
+
+![miku galore preview](https://github.com/user-attachments/assets/9375ed23-2b5c-48ad-a5e9-cedda88ff5a3)
+
+[^1]: **Z-Fighting** Refers to a rendering issue that occurs usually in games. It's a visual bug, that shows rapid fluctuation between two textures that are overlapping each other on the same layer. This issue can be fixed by simply spacing these layers a bit further from the z-axis, which is why they are referred to as `z-fighting`. As for this app, the *band-aid* solution I've implemented for when you want multiple Mikus in your desktop, is by simply having them only force a `always bring to front` state after movement commands, and for a specified duration (such as a second) only.
 
 # Controls
 
@@ -66,25 +78,15 @@ Please do report any issues found that are not solvable with the fixes provided 
 
 ## The Known Issues
 
-1. Miku, the window, or the speech bubble appears to be stretched, clipped, or stretched.
-    - Try [Fix 3](#fix-3) first then [Fix 1](#fix-1) if it doesn't work.
-    - *This issue could be because of how `Flet` handles transparent windows.*
-2. A border around Miku appears during app launch.
-    - Try [Fix 1](#fix-1).
-    - *This issue could also be because of how `Flet` handles transparent windows.*
-3. Miku suddenly stops her idle animation.
-    - Try [Fix 2](#fix-2).
-    - *This issue occurs when clicking her registers as a drag event, but is immediately canceled, resulting in the events not registering correctly.*
-4. After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but nothing serious.
-    - *This issue is still under scrutiny.*
-5. Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds of the monitor.
-    - *This issue is still under scrutiny.*
-6. When launching the app, it sometimes just doesn't stop loading.
-    - Try [Fix 1](#fix-1).
-    - *This issue is still under scrutiny.*
-7. **(Potentially Fixed)** When launching the app, it sometiems refuses to show itself, thus forcing the app to become a background process, which can only be exited by ending it in the task manager, which is very inconvenient.
-    - You can try [Fix 1](#fix-1) but I sure hope this doesn't happen **at all**.
-    - I've implemented a hot fix for this, and the possible reason for this issue, is with how `flet` handles page visibility, when it has been initially set to `False`.
+| Issue No. | Issue | Description | The Fix | Is Fixed? |
+| ----------- | ----------- | ----------- | ----------- | ----------- |
+| 1 | Miku, the window, or the speech bubble appears to be stretched, clipped, or stretched. | This issue could be because of how `Flet` handles transparent windows. | Try [Fix 3](#fix-3) first then [Fix 1](#fix-1) if it doesn't work. | Nope, occurrs sometimes. |
+| 2 | A border around Miku appears during app launch. | This issue could also be because of how `Flet` handles transparent windows. | Try [Fix 1](#fix-1). | Nope, occurrs sometimes. |
+| 3 | Miku suddenly stops her idle animation. | This issue occurs when clicking her registers as a drag event, but is immediately canceled, resulting in the events not registering correctly. | Try [Fix 2](#fix-2). | Only happens during overlapping action registers. |
+| 4 | After dragging Miku, her position doesn't update, and will return to her initial position pre-drag; happens occasionally, but nothing serious. | This issue is still under scrutiny. | Fixes itself. | Happens rarely, and probably also during overlapping action registers. |
+| 5 | Miku's randomized movement anchor is misplaced once dragged off-screen at the bottom; only happens if you intentionally drag her way below bounds of the monitor. | This issue is still under scrutiny. | Fixes itself if you just don't drag her way below the boundaries of your monitor. | Happens all the time based on my testing. |
+| 6 | When launching the app, it sometimes just doesn't stop loading. | This issue is still under scrutiny. | Try [Fix 1](#fix-1). | Probably only happens if your device has a lot of background apps. |
+| 7 | When launching the app, it sometiems refuses to show itself, thus forcing the app to become a background process, which can only be exited by ending it in the task manager, which is very inconvenient. | I've implemented a hot fix for this, and the possible reason for this issue, is with how `flet` handles page visibility, when it has been initially set to `False`. | You can try [Fix 1](#fix-1) if it happens. | This issue **should be fixed** by now, as I've applied a hot fix for this. |
   
 ## Fix 1
 
