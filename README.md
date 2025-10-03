@@ -53,7 +53,7 @@ Below is what this unintended behavior would look like:
 
 ![miku galore preview](https://github.com/user-attachments/assets/9375ed23-2b5c-48ad-a5e9-cedda88ff5a3)
 
-[^1]: **Z-Fighting** Refers to a rendering issue that occurs usually in games. It's a visual bug, that shows rapid fluctuation between two textures that are overlapping each other on the same layer. This issue can be fixed by simply spacing these layers a bit further from the z-axis, which is why they are referred to as `z-fighting`. As for this app, the *band-aid* solution I've implemented for when you want multiple Mikus in your desktop, is by simply having them only force a `always bring to front` state after movement commands, and for a specified duration (such as a second) only.
+[^1]: `z-fighting` refers to a rendering issue that occurs usually in games. It's a visual bug, that shows rapid fluctuation between two textures that are overlapping each other on the same layer. This issue can be fixed by simply spacing these layers a bit further from the z-axis, which is why they are referred to as `z-fighting`. As for this app, the *band-aid* solution I've implemented for when you want multiple Mikus in your desktop, is by simply having them only force a `always bring to front` state after movement commands, and for a specified duration (such as a second) only.
 
 # Controls
 
