@@ -43,4 +43,4 @@ def main(page: ft.Page):
     page.add(ft.ElevatedButton("Snap to Bounds", on_click=check_and_adjust_bounds))
     page.add(ft.Text("Drag the window off-screen and click to fix."))
 
-ft.app(main)
+ft.run(main=main)

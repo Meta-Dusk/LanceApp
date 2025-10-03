@@ -12,6 +12,7 @@ CHAT_GREETINGS = [
     ("Hello, I'm Hatsune Miku! ヾ(•ω•`)o", Miku.HAPPY),
     (f"Good {get_day_period(return_str=True).capitalize()}! Genki? ヾ(^▽^*)))", Miku.HAPPY),
     (f"Let's start the {get_day_period(return_str=True)} feeling energized! o(^▽^)o", Miku.JOY),
+    ("Miku dayo~（＾∀＾●）ﾉｼ", Miku.HAPPY)
 ]
 
 EXIT_APP_MSGS = [
