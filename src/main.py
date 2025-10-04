@@ -4,7 +4,7 @@ from main_ui import main_app
 from setup import before_main_app
 
 # TODO: Implement a feature to disable/enable debug mode
-DEBUG = True
+DEBUG = False
 
 
 async def main(page: ft.Page):

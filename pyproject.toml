@@ -1,20 +1,20 @@
 [project]
 name = "MikuMiku"
-version = "0.4.1"
+version = "0.4.2"
 description = "A Flet App Made for Lance"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.13"
 authors = [
   { name = "MetaDusk", email = "andredcxxv@gmail.com" }
 ]
-license = { text = "MIT" }
+license = { text = "AGPL-3.0" }
 
 dependencies = [
-  "flet==0.70.0.dev5623",
-  "flet-desktop==0.70.0.dev5623",
+  "flet==0.70.0.dev6214",
+  "flet-desktop==0.70.0.dev6214",
   "screeninfo==0.8.1",
   "desktop_notifier==6.2.0",
-  "pip"   # Just so flet can install properly
+  "pip>=25.2", # Only needed since flet needs it
 ]
 
 [tool.flet]
@@ -25,26 +25,16 @@ copyright = "Copyright (C) 2025 MetaDusk"
 compile_app = true
 compile_packages = true
 cleanup_on_compile = true
-build_number = 7
+build_number = 1
 
 [tool.flet.assets]
-include = [
+include = [ 
   "data/**",
   "images/**",
   "fonts/**"
 ]
 
-[tool.flet.splash]
-color = "#ffffff"
-dark_color = "#333333"
-
-[tool.flet.app]
-path = "src"
-
-[tool.flet.app.boot_screen]
-show = true
-message = "Preparing Hatsune Miku... Just a bit longer..."
-
-[tool.flet.app.startup_screen]
-show = true
-message = "Waking Hatsune Miku up... Please wait."
+[dependency-groups]
+dev = [
+    "tomlkit>=0.13.3",
+]
