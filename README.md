@@ -2,13 +2,11 @@
 
 **Happy Birthday, Marcus Lance!**
 
-> Current version: v0.4.1
-> 
 > Started on September 22, 2025
 
 # Preview
 
-Below is a preview of what you'd expect with the app (which is the latest release: v0.4.0):
+Below is a preview of what you'd expect with the app (as of version `0.4.X`):
 
 ![MikuMiku App v0.4.0 Preview GIF](https://github.com/user-attachments/assets/743c5e1e-82b9-4eb1-bb8c-a431f940287e)
 
