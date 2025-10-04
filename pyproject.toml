@@ -34,6 +34,21 @@ include = [
   "fonts/**"
 ]
 
+[tool.flet.splash]
+color = "#ffffff"
+dark_color = "#333333"
+
+[tool.flet.app]
+path = "src"
+
+[tool.flet.app.boot_screen]
+show = true
+message = "Preparing Hatsune Miku... Just a bit longer..."
+
+[tool.flet.app.startup_screen]
+show = true
+message = "Waking Hatsune Miku up... Please wait."
+
 [dependency-groups]
 dev = [
     "tomlkit>=0.13.3",
