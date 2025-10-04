@@ -25,7 +25,7 @@ copyright = "Copyright (C) 2025 MetaDusk"
 compile_app = true
 compile_packages = true
 cleanup_on_compile = true
-build_number = 1
+build_number = 4
 
 [tool.flet.assets]
 include = [ 

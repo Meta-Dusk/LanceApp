@@ -1,8 +1,9 @@
 """
-bump_build.py — preserves pyproject.toml formatting using tomlkit.
+This script automatically increments or resets [tool.flet].build_number
+based on [project].version. Also preserves pyproject.toml formatting using tomlkit.
 
-Automatically increments or resets [tool.flet].build_number
-based on [project].version.
+If you want to run this script separately, you can with (if with `uv`):
+    uv run py -m tools.bump_build
 """
 
 from pathlib import Path
@@ -36,7 +37,7 @@ def main():
         new_build = 1
     else:
         new_build = build_number + 1
-        print(f"⬆️ Incrementing build_number: {build_number} → {new_build}")
+        print(f"⬆️  Incrementing build_number: {build_number} → {new_build}")
 
     # Update the value
     flet_table["build_number"] = new_build
