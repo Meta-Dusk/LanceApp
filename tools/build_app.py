@@ -115,11 +115,10 @@ def main():
         inno_output_dir = ROOT / "dist" / "installer"
         inno_output_dir.mkdir(parents=True, exist_ok=True)
 
-        version_tag = f"MikuMiku-v{version_after}"
+        version_tag = f"MikuMikuApp-v{version_after}-Win64-Installer"
         inno_cmd = [
             "iscc",
             f"/O{inno_output_dir}",             # Output folder
-            f"/F{version_tag}",                 # Output file name
             f"/DMyAppVersion={version_after}",  # Pass version from pyproject.toml
             str(INSTALLER)
         ]

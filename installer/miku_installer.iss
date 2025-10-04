@@ -3,7 +3,9 @@
 ; Paths are relative, version is auto-updated by build script
 
 #define MyAppName "MikuMikuApp"
-#define MyAppVersion GetString("MyAppVersion", "0.0.0")
+#ifndef MyAppVersion
+#define MyAppVersion "0.0.0"
+#endif
 #define MyAppPublisher "MetaDusk Inc."
 #define MyAppURL "https://github.com/Meta-Dusk/DesktopAssistant"
 #define MyAppExeName "mikumiku.exe"
@@ -31,7 +33,7 @@ OutputBaseFilename={#MyAppName}-v{#MyAppVersion}-Win64-Installer
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-SetupIconFile=F:\Coding Projects\Random Projects\LanceApp\src\assets\images\icon.ico
+SetupIconFile=..\src\assets\images\icon.ico
 SignTool=signtool
 SignedUninstaller=yes
 
