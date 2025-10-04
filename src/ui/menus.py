@@ -64,9 +64,21 @@ class DefaultMenu:
         """Add a new button to the menu."""
         btn = default_button(text=text, on_click=on_click)
         self._buttons.controls.append(btn)
-        if self.container.page is not None:
+        
+        # `if self.container.page is not None:`
+        # As of dev versions >= 6200, and currently: "flet==0.70.0.dev6214";
+        # When checking if a container is already attached to a page, there 3 options. The 1st one is
+        # implemented below:
+        if hasattr(self.container, "_page_ref") and self.container._page_ref() is not None:
             self.container.update()
         return btn
+        # Option 2 is by wrapping it in a try/except catch like this:
+        # try:
+        #     if self.container.page:
+        #         ...
+        # except RuntimeError:
+        #     pass
+        # Option 3 is you simply do `page.add()` and add the container first before accessing it.
 
     def build(self) -> ft.Container:
         """Return the root container for placement in the UI."""
